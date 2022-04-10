@@ -22,14 +22,16 @@ passport.deserializeUser(async (id, done) => {
       name : result.rows[0].name,
       email : result.rows[0].email
     };
+    done(null, user);
+  } else {
+    done('authError', null);
   }
-  done(null, user);
 });  
   
 passport.use(new GoogleStrategy({
     clientID: keys.google.clientID,
     clientSecret: keys.google.clientSecret,
-    callbackURL:"http://localhost:3000/auth/callback",
+    callbackURL:"http://localhost:3000/auth/google/redirect",
     passReqToCallback:true
   },
   async function(request, accessToken, refreshToken, profile, done) {
@@ -39,9 +41,12 @@ passport.use(new GoogleStrategy({
       [profile.id]
     );
     if (result.rows.length === 0){
+      console.log(profile.email)
+      console.log(profile.displayName)
+      console.log(profile)
       // User does not exist a new one is created
       const result = await query(
-        'INSERT INTO user_account (google_id, email, name) VALUES ($1, $2, $3) RETURNING *',
+        'INSERT INTO user_account (google_id, name, email) VALUES ($1, $2, $3) RETURNING *',
         [profile.id, profile.displayName, profile.email]
       );
       if (result.rows.length === 0) {

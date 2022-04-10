@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('./partials/head'); %>
+</head>
+<body class="container">
+
+<header>
+  <%- include('./partials/header', {navItem: 'new-comp'}); %>
+</header>
+
+<main>
+  <div class="jumbotron">
+    <h1>Nýtt mót</h1>
+    <form>
+        <div class="form-group">
+            <label for="compType">Tegund móts</label>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="compType" id="radioBoulder" value="boulder" checked>
+                <label class="form-check-label" for="compType">
+                    Grjótglíma
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="compType" id="radioLead" value="lead">
+                <label class="form-check-label" for="compType">
+                    línuklifur
+                </label>
+            </div>
+            <label for="compType">Tegund móts</label>
+            <select class="form-control" id="compType">
+                <option>Grjótglíma</option>
+                <option>Línuklifur</option>
+            </select>
+        </div>
+        <button onclick="createClone()">Ný leið</button>
+        <div class="megatron" id="categories">
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                  <a class="nav-link active" data-bs-toggle="tab" href="#tab1">Karlar</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" data-bs-toggle="tab" href="#tab2">Konur</a>
+                </li>
+                <li class="nav-item">
+                  <button class="btn btn-light" onclick="addTab()">+</a>
+                </li>
+              </ul>
+              <div class="tab-content">
+                  <div class="tab-pane fade show active" id="tab1">
+                      <p>Home tab content ...</p>
+                  </div>
+                  <div class="tab-pane fade" id="tab2">
+                      <p>Profile tab content ...</p>
+                  </div>
+              </div>
+        </div>
+    </form>
+  </div>
+</main>
+
+<footer>
+  <%- include('./partials/footer'); %>
+</footer>
+
+</body>
+</html>
+<script>
+    function createClone() {
+        console.log('ný leið')
+    }
+</script>

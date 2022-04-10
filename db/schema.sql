@@ -1,7 +1,9 @@
 CREATE TABLE climber (
     id serial primary key,
     name varchar(64) not null,
-    dob date
+    dob date,
+    create_timestamp timestamp,
+    modify_timestamp timestamp
 );
 
 CREATE TABLE user_account (
@@ -9,16 +11,21 @@ CREATE TABLE user_account (
     google_id varchar(32),
     email varchar(128),
     name varchar(64),
-    climber_id integer REFERENCES climber(id)
+    climber_id integer REFERENCES climber(id),
+    create_timestamp timestamp,
+    modify_timestamp timestamp
 );
 
 CREATE TABLE competition (
     id serial primary key,
     name varchar(64),
+    date date
     type varchar(10),
     description varchar(1024),
     parent_comp integer REFERENCES competition(id) ON DELETE CASCADE,
-    owner_id integer REFERENCES user_account(id)
+    owner_id integer REFERENCES user_account(id),
+    create_timestamp timestamp,
+    modify_timestamp timestamp
 );
 
 CREATE TABLE problem (
@@ -31,7 +38,9 @@ CREATE TABLE problem (
     max_tries integer,
     time_limit integer,
     time_buffer integer,
-    hold_count integer
+    hold_count integer,
+    create_timestamp timestamp,
+    modify_timestamp timestamp
 );
 
 CREATE TABLE attempt (
@@ -42,13 +51,17 @@ CREATE TABLE attempt (
     bonus integer,
     max_hold integer,
     comment varchar(1024),
-    UNIQUE(problem_id, climber_id)
+    UNIQUE(problem_id, climber_id),
+    create_timestamp timestamp,
+    modify_timestamp timestamp
 );
 
 CREATE TABLE moderator (
     comp_id integer NOT NULL REFERENCES competition(id),
     user_id integer NOT NULL REFERENCES user_account(id),
-    UNIQUE(comp_id, user_id)
+    UNIQUE(comp_id, user_id),
+    create_timestamp timestamp,
+    modify_timestamp timestamp
 );
 
 -- CREATE TABLE image (

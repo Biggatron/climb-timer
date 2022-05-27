@@ -1,8 +1,9 @@
 const query = require('./db');
 const fs = require('fs');
 const util = require('util');
+const keys = require('../config/keys');
 
-const connectionString = "postgres://brdrveuq:yrVUAy-dDW9rGvpYujnZZa3XtJTyITAP@manny.db.elephantsql.com/brdrveuq ";
+const connectionString = keys.postgres.connectionString;
 
 const readFileAsync = util.promisify(fs.readFile);
 
@@ -19,7 +20,7 @@ async function main() {
 
   // búa til töflur
   try {
-    const createTable = await readFileAsync('./db/schema.sql');
+    const createTable = await readFileAsync('./schema.sql');
     await query(createTable.toString('utf8'));
     console.info('Töflur búnar til');
   } catch (e) {
@@ -28,7 +29,7 @@ async function main() {
   }
   
   try {
-    const insert = await readFileAsync('./db/insert.sql');
+    const insert = await readFileAsync('./insert.sql');
     await query(insert.toString('utf8'));
     console.info('Gögnum bætt við');
   } catch (e) {

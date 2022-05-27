@@ -11,50 +11,87 @@
 
 <main>
   <div class="jumbotron">
-    <h1>Nýtt mót</h1>
     <form>
+      <!-- Nafn á móti -->
+      <h1><input class="form-input" type="text" id="compName" placeholder="Heiti móts..."></input></h1>
         <div class="form-group">
+          <!-- Radio button fyrir tegund móts -->
             <label for="compType">Tegund móts</label>
             <div class="form-check">
-                <input class="form-check-input" type="radio" name="compType" id="radioBoulder" value="boulder" checked>
+                <input class="form-check-input" type="radio" name="compType" id="radioBoulder" value="boulder" onChange="compTypeRadioChange()" checked>
                 <label class="form-check-label" for="compType">
                     Grjótglíma
                 </label>
             </div>
             <div class="form-check">
-                <input class="form-check-input" type="radio" name="compType" id="radioLead" value="lead">
+                <input class="form-check-input" type="radio" name="compType" id="radioLead" value="lead" onChange="compTypeRadioChange()">
                 <label class="form-check-label" for="compType">
                     línuklifur
                 </label>
             </div>
+          <!-- Date picker fyrir dagsetningu móts-->
+            <div class="col-lg-3 col-sm-6">
+              <label for="compDate">Dagsetning móts</label>
+              <input id="compDate" class="form-control" type="date"/>
+            </div>
+            <!-- Textarea fyrir nánari upplýsingar-->
+            <div class="col-lg-6 col-sm-12">
+              <label for="compDescription">Nánari upplýsingar</label>
+              <textarea id="compDescription" class="form-control" type="text"></textarea>
+            </div>  
+
+            <!-- Drop down listi
             <label for="compType">Tegund móts</label>
             <select class="form-control" id="compType">
                 <option>Grjótglíma</option>
                 <option>Línuklifur</option>
-            </select>
+            </select> -->
         </div>
-        <button onclick="createClone()">Ný leið</button>
         <div class="megatron" id="categories">
-            <ul class="nav nav-tabs">
-                <li class="nav-item">
-                  <a class="nav-link active" data-bs-toggle="tab" href="#tab1">Karlar</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" data-bs-toggle="tab" href="#tab2">Konur</a>
-                </li>
-                <li class="nav-item">
-                  <button class="btn btn-light" onclick="addTab()">+</a>
-                </li>
-              </ul>
-              <div class="tab-content">
-                  <div class="tab-pane fade show active" id="tab1">
-                      <p>Home tab content ...</p>
+          <ul class="m-0 nav nav-fill nav-justified nav-tabs" id="myTab" role="tablist">
+
+            <li class="nav-item"> <button class="active nav-link" id="" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true"> <i class="fas fa-home"></i>Home</button></li>
+            <li class="nav-item" id="newTab">
+              <button type="button" class="nav-link" onclick="newCategory()">+</a>
+            </li>
+
+          </ul>
+          <div class="border-grey bg-white p-3 tab-content">
+
+              <div class="tab-pane active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                  <!-- Drop down listi með keppnisformi -->
+                  <div class="col-lg-6 col-sm-12">
+                    <label for="problemType">Keppnisform</label>
+                    <select class="form-control" id="problemType">
+                        <option selected>Tímamörk</option>
+                        <option>Fjöldi tilrauna</option>
+                    </select>
                   </div>
-                  <div class="tab-pane fade" id="tab2">
-                      <p>Profile tab content ...</p>
+                <div id="problemContainer">
+                  <div name="problem" class="form-group">
+                    <!-- Nafn á leið -->
+                    <h3 contenteditable="true">Leið 1</h3>
+                    <!-- Remark -->
+                    <!-- Max tries -->
+                    <div class="col-lg-6 col-sm-12">
+                      <label>Hámarks fjöldi tilrauna</label>
+                      <input type="number" name="quantity" min="0" step="1">
+                    </div>
+                    <!-- Time limit -->
+                    <div class="col-lg-6 col-sm-12">
+                      <label>Tímamörk</label>
+                      <input type="number" name="quantity" min="0" step="1">
+                    </div>
+                    <!-- Time Buffer -->
+                    <!-- Hold count -->
                   </div>
+                </div>
+                <button onclick="addProblem()">Bæta við leið</button>
               </div>
+
+          </div>
         </div>
+        <button onclick="createCompetition()">Stofna mót</button>
     </form>
   </div>
 </main>
@@ -66,7 +103,114 @@
 </body>
 </html>
 <script>
-    function createClone() {
-        console.log('ný leið')
+
+  var comp = { compName : '' }
+  compTypeRadioChange(); // Initializes comp type
+
+  // Get all existing categories
+  var children = document.getElementById('myTab').children;
+
+  // Get existing categories count to use later
+  var childrenCount = children.length;
+
+
+  function addProblem(problem) { // type = Boulder or lead
+    if (!problem) { problem = {} }; // Initialize problem if necessary
+
+    // Set problem name if not set
+    if (!problem.name) {
+      var problemCount = document.getElementById('problemContainer').children.length;
+      problem.name = `Leið ${problemCount}`
     }
+
+    // Hide lead or boulder settings
+    if (comp.compType === 'BOULDER') {
+      problem.leadHidden = true;
+    } else {
+      problem.boulderHidden = true;
+    }
+
+    // Initialize if empty
+    problem.maxTries = problem.maxTries ?? '0';
+    problem.timeLimit = problem.timeLimit ?? '0';
+    problem.timeBuffer = problem.timeBuffer ?? '0';
+    problem.holdCount = problem.holdCount ?? '0';
+    problem.remark = problem.remark ?? '';
+  
+
+
+  }
+
+  function compTypeRadioChange() {
+    var rad = document.getElementById('radioBoulder');
+    if (rad.checked) {
+      comp.compType = 'BOULDER';
+    } else {
+      comp.compType = 'LEAD';
+    }
+    console.log(comp)
+  }
+
+  function createClone() {
+
+    // Get a reference to the categories container to append to
+    var categories = document.getElementById('myTab');
+
+    // Get a reference to the new tab button to append new category before
+    var newTabNode = document.getElementById('newTab');
+
+    // Get a reference to the active category to copy
+    var activeCategory = document.getElementsByClassName('active');
+
+    // Clone active category
+    var newCategory = activeCategory[0].cloneNode(true);
+ 
+    // Overwrite values from cloned tab
+    newCategory.id = "cat" + ( childrenCount); 
+    newCategory.className = "nav-link";
+
+    // 
+    var found = false;
+    for (var i=1; i<=100; i++) {
+      var newCategoryName = newCategory.innerText + "(" + i + ")";
+      for (var j=0; j<children.length; j++) {
+        if (children[0].innerText === newCategoryName) {
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        newCategory.innerText = newCategoryName;
+        break;
+      }
+    }
+
+
+    // Create li element to wrap new cloned tab
+    var newListItem = document.createElement('li');
+    newListItem.className = "nav-item";
+    newListItem.appendChild(newCategory);
+    
+    // Insert new category tab before new tab button
+    categories.insertBefore(newListItem, newTabNode);
+    
+    ++childrenCount;
+
+    // console.log(categories);
+    // for (var i = 0; i < children.length; i++) {
+      //   var currCategory = children[i];
+      //   if ( currCategory.classList.contains('active')) {
+      //     cu
+      //     newCategory = currCategory.cloneNode(true);
+      //     newCategory.id = "category" + ( children.length + 1 ); 
+      //     console.log(newCategory.id);
+      //     categories.appendChild(newCategory);
+      //   }
+      // }
+  }
+  function newCategory() {
+    console.log('new cat');
+
+
+  }
 </script>

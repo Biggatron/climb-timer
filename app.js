@@ -4,6 +4,7 @@ const passport = require('passport')
 const authRoutes = require('./routes/auth-routes');
 const profileRoutes = require('./routes/profile-routes');
 const compRoutes = require('./routes/comp-routes');
+const timerRoutes = require('./routes/timer-routes');
 const passportSetup = require('./config/passport')
 const keys = require('./config/keys');
 
@@ -42,6 +43,7 @@ app.use(passport.session());
 app.use('/auth', authRoutes);
 app.use('/profile', profileRoutes);
 app.use('/comp', compRoutes);
+app.use('/timer', timerRoutes);
 
 app.get('/', (req, res) => {
   res.render('home2', {user: req.user})

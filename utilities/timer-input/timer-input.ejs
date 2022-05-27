@@ -1,0 +1,90 @@
+<div class="timer-input-container">
+    <div class="timer-intput-buttons-container">
+        <button class="timer-input-button" onclick="increaseMinutes()">+</button>
+        <button class="timer-input-button" onclick="increaseSeconds()">+</button>
+    </div>
+    <div class="timer-input-time-container">
+        <div id="timerMinutes">00</div>
+        <div>:</div>
+        <div id="timerSeconds">00</div>
+    </div>
+    <div class="timer-intput-buttons-container">
+        <button class="timer-input-button" onclick="decreaseMinutes()">-</button>
+        <button class="timer-input-button" onclick="decreaseSeconds()">-</button>
+    </div>
+</div>
+
+<script>
+    var step = 15;
+
+    var timer = {
+        minutes: 0,
+        seconds: 0
+    }
+    var timerString = {
+        minutes: '00',
+        seconds: '00'
+    }
+
+    var minEl = document.getElementById('timerMinutes');
+    var secEl = document.getElementById('timerSeconds');
+
+    function increaseMinutes() {
+        if (timer.minutes < 99) ++timer.minutes;
+        updateMinutes();
+    }
+
+    function decreaseMinutes() {
+        if (timer.minutes > 0) --timer.minutes;
+        updateMinutes();
+    }
+
+    function increaseSeconds() {
+        if ((timer.seconds + step) === 60) {
+            if (timer.minutes < 99 ) {
+                ++timer.minutes;
+                timer.seconds = 0;
+            }
+        } else {
+            timer.seconds += step;
+        }
+        updateMinutes();
+        updateSeconds();
+    }
+
+    function decreaseSeconds() {
+        if ((timer.seconds - step) < 0) {
+            if (timer.minutes > 0 ) {
+                --timer.minutes;
+                timer.seconds = 60 - step;
+            }
+        } else {
+            timer.seconds -= step;
+        }
+        updateMinutes();
+        updateSeconds();
+    }
+
+    function updateMinutes() {
+        if (timer.minutes.toString().length === 1) {
+            timerString.minutes = '0' + timer.minutes;
+        } else {
+            timerString.minutes = timer.minutes.toString();
+        }
+        minEl.innerText = timerString.minutes;
+    }
+
+    function updateSeconds() {
+        if (timer.seconds.toString().length === 1) {
+            timerString.seconds = '0' + timer.seconds;
+        } else {
+            timerString.seconds = timer.seconds.toString();
+        }
+        secEl.innerText = timerString.seconds;
+    }
+
+    function zeroPad(num) {
+        var zero = 2 - num.toString().length + 1;
+        return Array(+(zero > 0 && zero)).join("0") + num;
+    }
+</script>

@@ -19,7 +19,7 @@ CREATE TABLE user_account (
 CREATE TABLE competition (
     id serial primary key,
     name varchar(64),
-    date date
+    date date,
     type varchar(10),
     description varchar(1024),
     parent_comp integer REFERENCES competition(id) ON DELETE CASCADE,
@@ -62,6 +62,14 @@ CREATE TABLE moderator (
     UNIQUE(comp_id, user_id),
     create_timestamp timestamp,
     modify_timestamp timestamp
+);
+
+CREATE TABLE timer (
+    start_time timestamp,
+    timer_code varchar(3),
+    user_id integer REFERENCES user_account(id),
+    timer_duration integer,
+    timer_buffer integer    
 );
 
 -- CREATE TABLE image (

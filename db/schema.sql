@@ -65,11 +65,15 @@ CREATE TABLE moderator (
 );
 
 CREATE TABLE timer (
+    timer_code varchar(4) primary key,
+    create_timestamp timestamp,
     start_time timestamp,
-    timer_code varchar(3),
-    user_id integer REFERENCES user_account(id),
+    time_remaining_from_start time(3),
+    user_id integer,
     timer_duration integer,
-    timer_buffer integer    
+    timer_buffer integer,
+    is_paused boolean,
+    comp integer REFERENCES competition(id)
 );
 
 -- CREATE TABLE image (

@@ -1,17 +1,38 @@
+<link rel="stylesheet" href="/css/timer.css" type="text/css">
 <div class="timer-input-container">
-    <div class="timer-intput-buttons-container">
-        <button class="timer-input-button" onclick="increaseMinutes()">+</button>
-        <button class="timer-input-button" onclick="increaseSeconds()">+</button>
+    <div class="timer-input">
+        <p>Tími</p>
+        <div class="timer-input-buttons-container">
+            <button class="timer-input-button" onclick="increaseTimerMinutes()">+</button>
+            <button class="timer-input-button" onclick="increaseTimerSeconds()">+</button>
+        </div>
+        <div class="timer-input-time-container">
+            <div id="timerMin" class="timer-input-text">00</div>
+            <div class="timer-input-text">:</div>
+            <div id="timerSec" class="timer-input-text">00</div>
+        </div>
+        <div class="timer-input-buttons-container">
+            <button class="timer-input-button" onclick="decreaseTimerMinutes()">-</button>
+            <button class="timer-input-button" onclick="decreaseTimerSeconds()">-</button>
+        </div>
     </div>
-    <div class="timer-input-time-container">
-        <div id="timerMinutes">00</div>
-        <div>:</div>
-        <div id="timerSeconds">00</div>
+    <div class="timer-input">
+        <p>Buffer</p>
+        <div class="timer-input-buttons-container">
+            <button class="timer-input-button" onclick="increaseBufferMinutes()">+</button>
+            <button class="timer-input-button" onclick="increaseBufferSeconds()">+</button>
+        </div>
+        <div class="timer-input-time-container">
+            <div id="bufferMin" class="timer-input-text">00</div>
+            <div class="timer-input-text">:</div>
+            <div id="bufferSec" class="timer-input-text">00</div>
+        </div>
+        <div class="timer-input-buttons-container">
+            <button class="timer-input-button" onclick="decreaseBufferMinutes()">-</button>
+            <button class="timer-input-button" onclick="decreaseBufferSeconds()">-</button>
+        </div>
     </div>
-    <div class="timer-intput-buttons-container">
-        <button class="timer-input-button" onclick="decreaseMinutes()">-</button>
-        <button class="timer-input-button" onclick="decreaseSeconds()">-</button>
-    </div>
+    
 </div>
 
 <script>
@@ -21,66 +42,106 @@
         minutes: 0,
         seconds: 0
     }
+    var buffer = {
+        minutes: 0,
+        seconds: 0
+    }
     var timerString = {
         minutes: '00',
         seconds: '00'
     }
-
-    var minEl = document.getElementById('timerMinutes');
-    var secEl = document.getElementById('timerSeconds');
-
-    function increaseMinutes() {
-        if (timer.minutes < 99) ++timer.minutes;
-        updateMinutes();
+    var bufferString = {
+        minutes: '00',
+        seconds: '00'
     }
 
-    function decreaseMinutes() {
-        if (timer.minutes > 0) --timer.minutes;
-        updateMinutes();
+    var timerMinEl = document.getElementById('timerMin');
+    var timerSecEl = document.getElementById('timerSec');
+    var bufferMinEl = document.getElementById('bufferMin');
+    var bufferSecEl = document.getElementById('bufferSec');
+
+    // Timer events
+    function increaseTimerMinutes() {
+        increaseMinutes(timer, timerString, timerMinEl)
+    }  
+    function decreaseTimerMinutes() {
+        decreaseMinutes(timer, timerString, timerMinEl)
+    }  
+    function increaseTimerSeconds() {
+        increaseSeconds(timer, timerString, timerMinEl, timerSecEl)
+    }  
+    function decreaseTimerSeconds() {
+        decreaseSeconds(timer, timerString, timerMinEl, timerSecEl)
+    }  
+
+    // Buffer events
+    function increaseBufferMinutes() {
+        increaseMinutes(buffer, bufferString, bufferMinEl)
+    }  
+    function decreaseBufferMinutes() {
+        decreaseMinutes(buffer, bufferString, bufferMinEl)
+    }  
+    function increaseBufferSeconds() {
+        increaseSeconds(buffer, bufferString, bufferMinEl, bufferSecEl)
+    }  
+    function decreaseBufferSeconds() {
+        decreaseSeconds(buffer, bufferString, bufferMinEl, bufferSecEl)
     }
 
-    function increaseSeconds() {
-        if ((timer.seconds + step) === 60) {
-            if (timer.minutes < 99 ) {
-                ++timer.minutes;
-                timer.seconds = 0;
+
+
+    function increaseMinutes(timeObj,stringObj, el) {
+        if (timeObj.minutes < 99) ++timeObj.minutes;
+        updateMinutes(timeObj, stringObj, el);
+    }
+
+    function decreaseMinutes(timeObj,stringObj, el) {
+        if (timeObj.minutes > 0) --timeObj.minutes;
+        updateMinutes(timeObj, stringObj, el);
+    }
+
+    function increaseSeconds(timeObj,stringObj, elMin, elSec) {
+        if ((timeObj.seconds + step) === 60) {
+            if (timeObj.minutes < 99 ) {
+                ++timeObj.minutes;
+                timeObj.seconds = 0;
             }
         } else {
-            timer.seconds += step;
+            timeObj.seconds += step;
         }
-        updateMinutes();
-        updateSeconds();
+        updateMinutes(timeObj, stringObj, elMin);
+        updateSeconds(timeObj, stringObj, elSec);
     }
 
-    function decreaseSeconds() {
-        if ((timer.seconds - step) < 0) {
-            if (timer.minutes > 0 ) {
-                --timer.minutes;
-                timer.seconds = 60 - step;
+    function decreaseSeconds(timeObj, stringObj, elMin, elSec) {
+        if ((timeObj.seconds - step) < 0) {
+            if (timeObj.minutes > 0 ) {
+                --timeObj.minutes;
+                timeObj.seconds = 60 - step;
             }
         } else {
-            timer.seconds -= step;
+            timeObj.seconds -= step;
         }
-        updateMinutes();
-        updateSeconds();
+        updateMinutes(timeObj, stringObj, elMin);
+        updateSeconds(timeObj, stringObj, elSec);
     }
 
-    function updateMinutes() {
-        if (timer.minutes.toString().length === 1) {
-            timerString.minutes = '0' + timer.minutes;
+    function updateMinutes(timeObj, stringObj, el) {
+        if (timeObj.minutes.toString().length === 1) {
+            stringObj.minutes = '0' + timeObj.minutes;
         } else {
-            timerString.minutes = timer.minutes.toString();
+            stringObj.minutes = timeObj.minutes.toString();
         }
-        minEl.innerText = timerString.minutes;
+        el.innerText = stringObj.minutes;
     }
 
-    function updateSeconds() {
-        if (timer.seconds.toString().length === 1) {
-            timerString.seconds = '0' + timer.seconds;
+    function updateSeconds(timeObj, stringObj, el) {
+        if (timeObj.seconds.toString().length === 1) {
+            stringObj.seconds = '0' + timeObj.seconds;
         } else {
-            timerString.seconds = timer.seconds.toString();
+            stringObj.seconds = timeObj.seconds.toString();
         }
-        secEl.innerText = timerString.seconds;
+        el.innerText = stringObj.seconds;
     }
 
     function zeroPad(num) {

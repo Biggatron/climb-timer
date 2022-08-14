@@ -1,4 +1,5 @@
 insert into climber (id, name, dob) values (1, 'Birgir Óli Snorrason', '1995-07-15');
+insert into user_account (id, google_id, email, name, climber_id) values (2, '116376069439432417840', 'birgir.snorrason@gmail.com', 'Birgir Óli Snorrason', 1 );
 
 -- insert into user_account (email, username, hash, salt) values ('stockland@stockland.is', 'admin', 'fd005b3e42fe6e98acbb100485dbcaa8aa644c25c98d8f2e9d5de2e425d03a12279ad323839a9986e8f036cbae26c9537dd9ca44b735c56c000b45fb93e10aca', '396389accb473ee634eaf3270daa5a8d');
 

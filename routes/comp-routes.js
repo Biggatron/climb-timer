@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const query = require('../db/db');
 
 const authCheck = (req, res, next) => {
     if(!req.user){
@@ -8,8 +9,16 @@ const authCheck = (req, res, next) => {
     }
 };
 
+router.get('/', authCheck, (req, res) => {
+    getMyComps(req, res);
+});
+
 router.get('/create', authCheck, (req, res) => {
-    res.render('new-comp', { user: req.user });
+    res.render('comp/new-comp', { user: req.user });
+});
+
+router.get('/create', authCheck, (req, res) => {
+    res.render('comp/new-comp', { user: req.user }); // Útfæra create comp bakenda og klára framenda
 });
 
 router.get('/edit', authCheck, (req, res) => {
@@ -19,10 +28,32 @@ router.get('/edit', authCheck, (req, res) => {
 });
 
 router.get('/*', (req, res) => {
-    console.log('req:')
-    console.log(req.params)
-    res.send('comp/')
+    getComp(req, res);
 });
 
+async function getMyComps(req, res) {
+    console.log('userID = ' + req.user.id)
+    const result = await query(
+        `SELECT * FROM competition WHERE owner_id = '${req.user.id}'`
+    );
+    let comps = result.rows;
+    
+    res.render('comp/my-comps', { user: req.user, comps: comps });
+}
+
+async function getComp(req, res) {
+    let compID = req.params[0];
+    console.log('compID = ' + compID)
+    const result = await query(
+        `SELECT * FROM competition WHERE id = '${compID}'`
+    );
+    let comp = result.rows[0];
+    if ( comp ) {
+        res.render('comp/comp', { user: req.user, comp: comp });
+    } else {
+        res.sendStatus(404);
+    }
+    return;
+}
 
 module.exports = router;

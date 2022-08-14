@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head'); %>
+  <link rel="stylesheet" href="/css/timer.css" type="text/css">
+</head>
+<body class="container">
+
+<header>
+  <%- include('../partials/header', {navItem: 'timer'}); %>
+</header>
+
+<main>
+  <div class="jumbotron">
+    <div class="center-col-container">
+      <h1 class="center-self" id="timerRound">Round 1</h1>
+      <div class="timers-container">
+        <div class="timer-text-container">
+          <div class="timer-text" id="timerMin"></div>
+          <div class="timer-text">:</div>
+          <div class="timer-text" id="timerSec"></div>
+        </div>
+        <div class="timer-text-container">
+          <div class="timer-text" id="bufferMin"></div>
+          <div class="timer-text">:</div>
+          <div class="timer-text" id="bufferSec"></div>
+        </div>
+      </div>
+      <% if (!user) { %> 
+      <% } else if (user.id === timer.user_id) { %>
+        <div class="center-row-container">
+          <div class="m-2 d-grid gap-2 d-md-flex justify-content-md-center">  
+            <button onClick="startTimerClick()">Start</button>
+          </div>
+          <div class="m-2 d-grid gap-2 d-md-flex justify-content-md-center">  
+            <button onClick="pauseTimerClick()">Pause</button>
+          </div>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <%- include('../partials/footer'); %>
+</footer>
+<script src="/scripts/socket.io.js"></script>
+<script>
+</script>
+</body>
+</html>
+
+<script>
+  var timer, user;
+  
+  if ( <%- user !== undefined %> ) {
+    user = '<%- JSON.stringify(user) %>';
+    user = JSON.parse(user);
+  }
+  
+  if ( <%- timer !== undefined %> ) {
+    timer = '<%- JSON.stringify(timer) %>';
+    timer = JSON.parse(timer);
+  }
+
+  var socket = io({
+    query: {
+      timerCode: timer.timer_code
+    }
+  });
+
+  var timerInterval;
+
+  let timerMinEl = document.getElementById('timerMin');
+  let timerSecEl = document.getElementById('timerSec');
+  let bufferMinEl = document.getElementById('bufferMin');
+  let bufferSecEl = document.getElementById('bufferSec');
+  let timerRoundEl = document.getElementById('timerRound');
+
+  timer.timerMin = Math.floor(timer.timer_duration / 60);
+  timer.timerSec = timer.timer_duration % 60;
+  timer.bufferMin = Math.floor(timer.timer_buffer / 60);
+  timer.bufferSec = timer.timer_buffer % 60; 
+
+  timer.timerMinOrig = timer.timerMin;
+  timer.timerSecOrig = timer.timerSec;
+  timer.bufferMinOrig = timer.bufferMin;
+  timer.bufferSecOrig = timer.bufferSec;
+
+  timer.round = 1;
+  
+  socket.on("startTimer", () => {
+    console.log('start timer með socket')
+    startTimer();
+  });
+
+  socket.on("pauseTimer", () => {
+    pauseTimer();
+  });
+
+  updateTimerEl();
+
+  function updateTimerEl() {
+    if (timer.timerMin < 10)
+    timerMinEl.innerText = zeroPad(timer.timerMin.toString());
+    timerSecEl.innerText = zeroPad(timer.timerSec.toString());
+    bufferMinEl.innerText = zeroPad(timer.bufferMin.toString());
+    bufferSecEl.innerText = zeroPad(timer.bufferSec.toString());
+    timerRoundEl.innerText = "Round " + timer.round;
+  }
+
+  function zeroPad(num) {
+    if (num.length === 1) {
+      return "0" + num;
+    } else {
+      return num; 
+    }
+  }
+
+  function startTimerClick() {
+    if (timerInterval) return; 
+    socket.emit('startTimer', timer);
+    startTimer();
+  }
+
+  function pauseTimerClick() {
+    if (!timerInterval) return; 
+    socket.emit('pauseTimer', timer);
+    pauseTimer();
+  }
+
+  function startTimer() {
+    // Ef timerInterval er true þá er hann nú þegar í gangi
+    if (timerInterval) return; 
+
+    timerInterval = setInterval(function() {
+      if ( timer.timerSec > 0 ) {
+        timer.timerSec--;  
+      } else if ( timer.timerMin > 0) {
+        timer.timerMin--;
+        timer.timerSec = 59;
+      } else if ( timer.bufferSec > 0 ) {
+        timer.bufferSec--;
+      } else if ( timer.bufferMin > 0 ) {
+        timer.bufferMin--;
+        timer.bufferSec = 59;
+      } else {
+        timer.round++;
+        timer.timerMin = timer.timerMinOrig;
+        timer.timerSec = timer.timerSecOrig;
+        timer.bufferMin = timer.bufferMinOrig;
+        timer.bufferSec = timer.bufferSecOrig;
+      }
+      updateTimerEl();
+    }, 1000);
+  }
+
+  function pauseTimer() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  };
+</script>

@@ -1,28 +1,34 @@
 
 <nav class="navbar navbar-expand-lg navbar-light">
     <ul class="navbar-nav me-auto">
-      <li class="nav-item nav-brand">
+      <li class="nav-item">
         <a class="<%= navItem === 'home' ? 'navbar-brand' : 'nav-link' %>" href="/">Forsíða</a>
       </li>
       <li class="nav-item mx-3">
-        <a class="nav-link" href="/comp/climbers">Klifrarar</a>
+        <a class="<%= navItem === 'climbers' ? 'navbar-brand' : 'nav-link' %>" href="/comp/climbers">Klifrarar</a>
       </li>
       <li class="nav-item mx-3">
-        <a class="nav-link" href="/comp/">Mín mót</a>
+        <a class="<%= navItem === 'timer' ? 'navbar-brand' : 'nav-link' %>" href="/timer/">Niðurteljari</a>
       </li>
-      <li class="nav-item mx-3">
-        <a class="nav-link" href="/timer/">Niðurteljari</a>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          Mót
+        </a>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item <%= navItem === 'comp' ? 'navbar-brand' : 'nav-link' %>" href="/comp/">Mín mót</a></li>
+          <li><a class="dropdown-item <%= navItem === 'newComp' ? 'navbar-brand' : 'nav-link' %>" href="/comp/create/">Nýtt mót</a></li>
+        </ul>
       </li>
     </ul>
     <ul class="navbar-nav ms-auto">
         <li class="nav-item">
     <% if (user) { %>
-        <a class="nav-link" href="/profile">
+        <a class="<%= navItem === 'profile' ? 'navbar-brand' : 'nav-link' %>" href="/profile">
             <%= user.name %>
             <!-- <span class="material-icons md-36 orange">account_circle</span> -->
         </a>
     <% } else { %>
-        <a class="nav-link" href="/auth/login">Login</a>
+        <a class="<%= navItem === 'login' ? 'navbar-brand' : 'nav-link' %>" href="/auth/login">Login</a>
     <% } %>
 </li>
 </ul>

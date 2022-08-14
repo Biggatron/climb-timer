@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <%- include('./partials/head'); %>
+  <%- include('../partials/head'); %>
 </head>
 <body class="container">
 
 <header>
-  <%- include('./partials/header', {navItem: 'new-comp'}); %>
+  <%- include('../partials/header', {navItem: 'new-comp'}); %>
 </header>
 
 <main>
@@ -97,8 +97,13 @@
 </main>
 
 <footer>
-  <%- include('./partials/footer'); %>
+  <%- include('../partials/footer'); %>
 </footer>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  var socket = io();
+</script>
 
 </body>
 </html>

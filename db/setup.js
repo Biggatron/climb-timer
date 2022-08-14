@@ -16,11 +16,12 @@ async function main() {
   await query('DROP TABLE IF EXISTS problem CASCADE');
   await query('DROP TABLE IF EXISTS attempt CASCADE');
   await query('DROP TABLE IF EXISTS moderator CASCADE');
+  await query('DROP TABLE IF EXISTS timer CASCADE');
  console.info('Töflum eytt');
 
   // búa til töflur
   try {
-    const createTable = await readFileAsync('./schema.sql');
+    const createTable = await readFileAsync('./db/schema.sql');
     await query(createTable.toString('utf8'));
     console.info('Töflur búnar til');
   } catch (e) {
@@ -29,7 +30,7 @@ async function main() {
   }
   
   try {
-    const insert = await readFileAsync('./insert.sql');
+    const insert = await readFileAsync('./db/insert.sql');
     await query(insert.toString('utf8'));
     console.info('Gögnum bætt við');
   } catch (e) {

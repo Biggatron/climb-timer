@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head'); %>
+</head>
+<body class="container">
+
+<header>
+  <%- include('../partials/header', {navItem: 'timer'}); %>
+</header>
+
+<main>
+  <div class="jumbotron">
+    <div class="center-row-container">
+      <div class="timer-container">
+          <%- include('../../utilities/timer-input/timer-input'); %>
+      </div>
+    </div>
+    <div class="center-col-container">
+      <div class="center-self">
+        <label for="timerCode">Auðkenni niðurteljara:</label>
+        <div class="center-row-container">
+          <input id="timerCode" type="text" minlength="3" maxlength="3">
+          <button onclick="randomizeTimerCode()">Random</button>
+        </div>
+      </div>   
+      <div class="m-2 d-grid gap-2 d-md-flex justify-content-md-center">     
+        <button onclick="createNewTimer()">Vista</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <%- include('../partials/footer'); %>
+</footer>
+<script src="/scripts/socket.io.js"></script>
+<script>
+  var socket = io();
+</script>
+</body>
+</html>
+
+<script>
+  var user = <%- JSON.stringify(user) %>;
+  console.log(user);
+  var charArray = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
+  var timerCodeEl = document.getElementById('timerCode');
+
+  function randomizeTimerCode() {    
+    var timerCode = '';
+    for(var i=0; i<3; i++) {
+      timerCode = timerCode + charArray[Math.floor(Math.random() * charArray.length)];
+    }
+    timerCodeEl.value = timerCode;
+  }
+
+  function createNewTimer() {
+    console.log(document.getElementById('timerMin'));
+    let timer = parseInt(document.getElementById('timerMin').innerText) * 60 + parseInt(document.getElementById('timerSec').innerText);
+    let buffer = parseInt(document.getElementById('bufferMin').innerText) * 60 + parseInt(document.getElementById('bufferSec').innerText);
+
+    let timerData = {
+      code: timerCodeEl.value,
+      userId: user.id,
+      timer: timer,
+      buffer: buffer
+    };
+
+    postData('/timer/create', timerData).then(returnData => {
+      if (returnData) { // bakendi skilar timerData ef insert var successfull
+        window.location.href = '/timer/' + returnDate.timer_code;
+      } else {
+        alert('creation failed')
+      }
+      console.log(returnData); // JSON data parsed by `data.json()` call
+    });
+
+/*
+    fetch("/timer/create", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"}, 
+      body: {"text": "Biggi er bestur"}
+    }).then(res => {
+      console.log("Request complete! response:", res);
+    }); */
+  }
+</script> 

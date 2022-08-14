@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head'); %>
+</head>
+<body class="container">
+
+<header>
+  <%- include('../partials/header', {navItem: 'timer'}); %>
+</header>
+
+<main>
+  <div class="jumbotron">
+    <div class="timer-container">
+        <div class="timer-find">
+            <label for="inputTimerCode">Finna niðurteljara með kóða:</label>
+            <input id="inputTimerCode" type="text" maxlength="4" minlength="4">
+            <button onClick="searchTimer()">Leita</button>
+        </div>
+        <a href="/timer/create">Nýr niðurteljari</a>
+    </div>
+    <div class="timers-list">
+      <table id="timerListId" class="table table-hover">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Code</th>
+            <th scope="col">Competition</th>
+            <th scope="col">Timer</th>
+            <th scope="col">Buffer</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for (var i=0; i<timers.length; i++) { %>
+            <tr style=" cursor: pointer;">
+              <th scope="row"><%= i+1 %></th>
+              <td><%= timers[i].timer_code %></td>
+              <td><%= timers[i].comp === undefined ? 'No comp' : timers[i].comp %></td>
+              <td><%= timers[i].timerDurationText %></td>
+              <td><%= timers[i].bufferDurationText %></td>
+            </tr>
+            <%= console.log(timers) %>
+        <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <%- include('../partials/footer'); %>
+</footer>
+
+</body>
+</html>
+
+<script>
+  addRowHandlers();
+
+  function searchTimer() {
+    let timerCode = document.getElementById('inputTimerCode').value;
+    
+    getData('/timer/' + timerCode).then(returnData => {
+      console.log(returnData); // JSON data parsed by `data.json()` call
+    });
+
+  }
+
+  function addRowHandlers() {
+  var table = document.getElementById("timerListId");
+  var rows = table.getElementsByTagName("tr");
+  for (i = 0; i < rows.length; i++) {
+    var currentRow = table.rows[i];
+    var createClickHandler = function(row) {
+      return function() {
+        var cell = row.getElementsByTagName("td")[0];
+        var code = cell.innerHTML;
+        location.href = '/timer/' + code;
+      };
+    };
+    currentRow.onclick = createClickHandler(currentRow);
+  }
+}
+</script>

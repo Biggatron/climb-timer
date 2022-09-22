@@ -11,7 +11,6 @@
 
 <main>
   <div class="jumbotron">
-    <form>
       <!-- Nafn á móti -->
       <h1><input class="form-input" type="text" id="compName" placeholder="Heiti móts..."></input></h1>
         <div class="form-group">
@@ -48,51 +47,52 @@
             </select> -->
         </div>
         <div class="megatron" id="categories">
-          <ul class="m-0 nav nav-fill nav-justified nav-tabs" id="myTab" role="tablist">
+          <ul class="m-0 nav nav-fill nav-justified nav-tabs" id="categoryHeaderContatiner" role="tablist">
 
-            <li class="nav-item"> <button class="active nav-link" id="" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true"> <i class="fas fa-home"></i>Home</button></li>
+            <!-- <li class="nav-item"> 
+              <button contentEditable="true" class="active nav-link" id="" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true"> <i class="fas fa-home"></i>Flokkur 1</button>
+            </li> -->
+            <li class="nav-item"> 
+              <button id="category1" class="active nav-link" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true"><span contenteditable="true">Flokkur 1</span></button>
+            </li>
             <li class="nav-item" id="newTab">
               <button type="button" class="nav-link" onclick="newCategory()">+</a>
             </li>
 
           </ul>
-          <div class="border-grey bg-white p-3 tab-content">
+          <div id="categoryContentContatiner" class="border-grey bg-white p-3 tab-content">
 
-              <div class="tab-pane active" id="home" role="tabpanel" aria-labelledby="home-tab">
-                  <!-- Drop down listi með keppnisformi -->
-                  <div class="col-lg-6 col-sm-12">
-                    <label for="problemType">Keppnisform</label>
-                    <select class="form-control" id="problemType">
-                        <option selected>Tímamörk</option>
-                        <option>Fjöldi tilrauna</option>
-                    </select>
-                  </div>
-                <div id="problemContainer">
-                  <div name="problem" class="form-group">
-                    <!-- Nafn á leið -->
-                    <h3 contenteditable="true">Leið 1</h3>
-                    <!-- Remark -->
-                    <!-- Max tries -->
-                    <div class="col-lg-6 col-sm-12">
-                      <label>Hámarks fjöldi tilrauna</label>
-                      <input type="number" name="quantity" min="0" step="1">
-                    </div>
-                    <!-- Time limit -->
-                    <div class="col-lg-6 col-sm-12">
-                      <label>Tímamörk</label>
-                      <input type="number" name="quantity" min="0" step="1">
-                    </div>
-                    <!-- Time Buffer -->
-                    <!-- Hold count -->
+              <div class="tab-pane active" id="category1" role="tabpanel" aria-labelledby="home-tab">
+                <!-- Drop down listi með keppnisformi -->
+                <div class="col-lg-2 col-sm-4">
+                  <label for="problemType">Keppnisform</label>
+                  <select class="form-control" id="problemTypeId1" onchange="getProblemType(this)">
+                      <option value="timeLimit" selected>Tímamörk</option>
+                      <option value="attemptLimit">Fjöldi tilrauna</option>
+                  </select>
+                </div>
+                <div class="center-col-container col-lg-1 col-sm-2">
+                  <label>Fjöldi leiða</label>
+                  <input id="problemCountId1" type="number" name="problemCount" min="0" step="1" value="1">
+                </div>
+                <div id="maxTriesContainer1" hidden="true">
+                  <label>Hámarks fjöldi tilrauna</label>
+                  <div class="center-col-container col-lg-1 col-sm-2">
+                    <input id="maxTriesId1" type="number" name="problemTries" min="0" step="1" value="5">
                   </div>
                 </div>
-                <button onclick="addProblem()">Bæta við leið</button>
+                  <div id="timeLimitContainer1" class="center-col-container col-lg-1 col-sm-2">
+                    <label>Tímamörk</label>
+                    <input id="timeLimitId1" type="number" name="problemTimeLimit" min="0" step="1">
+                  </div>
+                <div id="problemContainer1" class="problemContainer">
+                  <div class="problem">
+                  </div>
+                </div>
               </div>
-
           </div>
         </div>
-        <button onclick="createCompetition()">Stofna mót</button>
-    </form>
+        <button onclick="createCompetition()" type>Stofna mót</button>
   </div>
 </main>
 
@@ -100,16 +100,11 @@
   <%- include('../partials/footer'); %>
 </footer>
 
-<script src="/socket.io/socket.io.js"></script>
-<script>
-  var socket = io();
-</script>
-
 </body>
 </html>
 <script>
-
-  var comp = { compName : '' }
+  var categoryCounter = 1; // Used to get next category ID
+  var comp = { }
   compTypeRadioChange(); // Initializes comp type
 
   // Get all existing categories
@@ -118,6 +113,39 @@
   // Get existing categories count to use later
   var childrenCount = children.length;
 
+  function readCompDataFromDOM() {
+    let compName = document.getElementById('compName').value;
+    let compDate = document.getElementById('compDate').value;
+    comp = {
+      name: compName,
+      date: compDate
+    };
+    return comp;
+  }
+
+  function getProblemType(selectObject) {
+    let problemType = selectObject.value;
+    var activeTab = document.getElementsByClassName("tab-pane active");
+    var activeTabChildren = activeTab.home.children;
+    console.log({activeTab})
+    console.log({activeTabChildren})
+
+  }
+
+  function createCompetition() {
+
+    let compData = readCompDataFromDOM();
+    console.log({compData});
+    postData('/comp/create', compData).then(returnData => {
+      console.log({returnData});
+      if (returnData) { // bakendi skilar compData með IDs ef insert var successfull
+        window.location.href = '/comp/' + returnData.id;
+      } else {
+        alert('creation failed')
+      }
+      console.log(returnData); // JSON data parsed by `data.json()` call
+    });
+  }
 
   function addProblem(problem) { // type = Boulder or lead
     if (!problem) { problem = {} }; // Initialize problem if necessary
@@ -129,7 +157,7 @@
     }
 
     // Hide lead or boulder settings
-    if (comp.compType === 'BOULDER') {
+    if (comp.type === 'BOULDER') {
       problem.leadHidden = true;
     } else {
       problem.boulderHidden = true;
@@ -149,23 +177,30 @@
   function compTypeRadioChange() {
     var rad = document.getElementById('radioBoulder');
     if (rad.checked) {
-      comp.compType = 'BOULDER';
+      comp.type = 'BOULDER';
     } else {
-      comp.compType = 'LEAD';
+      comp.type = 'LEAD';
     }
     console.log(comp)
   }
 
-  function createClone() {
+  function newCategory() {
+    categoryCounter++;
+
+    var categoryHeaders = document.getElementById('categoryHeaderContainer').chilren;
+    var categoryContents = document.getElementById('categoryContentContainer');
+
+    // Get a reference to the new tab button to append new category before
+    var newTabNode = document.getElementById('newTab');
+    
+    newTabNode.before('');
 
     // Get a reference to the categories container to append to
     var categories = document.getElementById('myTab');
 
-    // Get a reference to the new tab button to append new category before
-    var newTabNode = document.getElementById('newTab');
 
     // Get a reference to the active category to copy
-    var activeCategory = document.getElementsByClassName('active');
+    var activeCategory = document.getElementsByClassName('tab-pane active');
 
     // Clone active category
     var newCategory = activeCategory[0].cloneNode(true);

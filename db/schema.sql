@@ -68,11 +68,12 @@ CREATE TABLE timer (
     timer_code varchar(4) primary key,
     create_timestamp timestamp,
     start_time timestamp,
-    time_remaining_from_start time(3),
     user_id integer,
     timer_duration integer,
     timer_buffer integer,
-    is_paused boolean,
+    is_paused boolean default true,
+    time_elapsed integer, -- Time elapsed current round on pause
+    paused_round integer,
     comp integer REFERENCES competition(id)
 );
 

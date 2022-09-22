@@ -55,8 +55,10 @@ async function getTimer(res, req) {
     console.log("Query successfull: ");
     console.log('timer' + timer);
     if ( timer ) {
-        console.log('timer before render')
-        console.log(timer);
+        if (!timer.is_paused) {
+            let timeElapsedFromStart = new Date() - timer.start_time;
+            timer.time_elapsed += timeElapsedFromStart;
+        }
         res.render('timer/timer', { timer: timer, user: user });
     } else {
         res.sendStatus(404);

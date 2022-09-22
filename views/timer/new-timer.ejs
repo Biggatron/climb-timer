@@ -66,10 +66,10 @@
       timer: timer,
       buffer: buffer
     };
-
+    console.log({timerData});
     postData('/timer/create', timerData).then(returnData => {
       if (returnData) { // bakendi skilar timerData ef insert var successfull
-        window.location.href = '/timer/' + returnDate.timer_code;
+        window.location.href = '/timer/' + returnData.timer_code;
       } else {
         alert('creation failed')
       }

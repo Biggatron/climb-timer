@@ -65,12 +65,12 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('user disconnected');
   });
-  socket.on('startTimer', (msg) => {
-    console.log('user started timer ' + msg.timer_code);
-    events.startTimer(socket, io);
+  socket.on('startTimer', (timer) => {
+    console.log('user started timer ' + timer.timer_code);
+    events.startTimer(socket, io, timer);
   });
-  socket.on('pauseTimer', (msg) => {
-    events.pauseTimer(socket, io);
+  socket.on('pauseTimer', (timer) => {
+    events.pauseTimer(socket, io, timer);
   })
 });
 

@@ -1,0 +1,82 @@
+.timer-input-container {
+    display: flex;
+    flex-direction: row;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: large;
+    font-weight: 500;
+}
+
+.timer-input {
+    margin: 1em;
+}
+
+.timer-input-text {
+    margin: 5px;
+}
+
+.timer-input-time-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.timer-input-buttons-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.timer-input-button {
+    border-radius: 15%;
+    border-width: 2px;
+    width: 1.8em;
+    height: 1.8em;
+    margin: 2px;
+}
+
+.timer-input-button:hover {
+    background-color: lightgray;
+}
+
+.timer-input-button:active {
+    opacity: 70%; 
+}
+
+.timers-container {
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+}
+
+.timer-container {
+    padding: 1em;
+}
+
+.timer-text-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    border-style: solid;
+    border-radius: 1em;
+    border-width: 4px;
+    width: 100%;
+    margin: 2em;
+}
+
+@font-face {
+    font-family: 'Mono Digit';
+    src: url('../fonts/AzeretMono-Regular.ttf');
+}
+
+.timer-text {
+    font-family: Mono Digit, monospace;
+    font-size: 23vw;
+    font-weight: 700;
+    display: flex;
+    align-self: center;
+}
+
+.input.timer-checkbox {
+    width: 40px;
+    height: 40px;
+}

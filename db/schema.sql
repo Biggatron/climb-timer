@@ -66,14 +66,14 @@ CREATE TABLE moderator (
 
 CREATE TABLE timer (
     timer_code varchar(4) primary key,
-    create_timestamp timestamp,
+    create_time timestamp,
     start_time timestamp,
     user_id integer,
     timer_duration integer,
     timer_buffer integer,
     is_paused boolean default true,
+    rotating_background_color boolean default false,
     time_elapsed integer, -- Time elapsed current round on pause
-    paused_round integer,
     comp integer REFERENCES competition(id)
 );
 

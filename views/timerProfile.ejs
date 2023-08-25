@@ -2,20 +2,18 @@
 <html lang="en">
 <head>
   <%- include('./partials/head'); %>
-  <link rel="stylesheet" href="/css/login.css" type="text/css">
+  <link rel="stylesheet" href="/css/profile.css" type="text/css">
 </head>
 <body class="container">
 
 <header>
-  <%- include('./partials/header', {navItem: 'login'}); %>
+  <%- include('./partials/timerHeader', {navItem: 'profile'}); %>
 </header>
-  
+
 <main>
   <div class="jumbotron">
-    <h3>Login using...</h1>
-    <div class="google-btn">
-      <a href="/auth/google">Google+</a>
-    </div>
+    <h1>Welcome to your profile, <%= user.name %></h1>
+    <a href="/auth/logout">Logout</a>
   </div>
 </main>
 

@@ -15,3 +15,7 @@
     align-self: center;
     flex-direction: column;
 }
+
+.container {
+    padding-top: 10px;
+}

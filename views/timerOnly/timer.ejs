@@ -3,13 +3,13 @@
 
 <head>
   <%- include('../partials/head'); %>
-    <link rel="stylesheet" href="/css/timer.css" type="text/css">
+    <link rel="stylesheet" href="/css/timerOnly.css" type="text/css">
 </head>
 
 <body class="container">
 
   <header>
-    <%- include('../partials/header', {navItem: 'timer' }); %>
+    <%- include('../partials/timerHeader', {navItem: 'timer' }); %>
   </header>
 
   <main>
@@ -17,15 +17,10 @@
       <div class="center-col-container">
         <h1 class="center-self" id="timerRound">Round 1</h1>
         <div class="timers-container">
-          <div class="timer-text-container">
+          <div class="timer-text-container" id="timer-container">
             <div class="timer-text" id="timerMin"></div>
             <div class="timer-text">:</div>
             <div class="timer-text" id="timerSec"></div>
-          </div>
-          <div class="timer-text-container">
-            <div class="timer-text" id="bufferMin"></div>
-            <div class="timer-text">:</div>
-            <div class="timer-text" id="bufferSec"></div>
           </div>
         </div>
         <% if (!user) { %>
@@ -39,6 +34,14 @@
               </div>
             </div>
             <% } %>
+          <div class="center-row-container">
+            <div class="m-2 d-grid gap-2 d-md-flex justify-content-md-center">
+              <button onClick="toggleFullscreen()">Fullscreen</button>
+            </div>
+            <div class="m-2 d-grid gap-2 d-md-flex justify-content-md-center">
+              <button onClick="toggleSound()">Sound on/off</button>
+            </div>
+          </div>
       </div>
     </div>
   </main>
@@ -74,9 +77,12 @@
     }
   });
 
+  var soundOn = false;
+  var timerContainerEl = document.getElementById("timer-container");
   var shortBeep = document.getElementById("shortBeep");
   var longBeep = document.getElementById("longBeep");
 
+  var roundTime = timer.timer_duration * 1000 + timer.timer_buffer * 1000;
   var timerInterval;
   var intervalDelay;
   var startTimeStamp;
@@ -88,9 +94,6 @@
   let bufferSecEl = document.getElementById('bufferSec');
   let timerRoundEl = document.getElementById('timerRound');
 
-  // If paused round is initial then current round is first round
-  timer.round = timer.paused_round ? timer.paused_round : 1;
-
   initializeTimer();
   updateTimerEl();
   if (!timer.is_paused) { 
@@ -98,12 +101,21 @@
   };
 
   function playSound() {
-    if (timer.timerMin !== 0) {
+    // If sound is off then leave function
+    if (!soundOn) {
+      return;
+    }
+
+    if (timer.bufferActive) {
+      return;
+    } else if (timer.timerMin !== 0) {
       return;
     } else if (timer.timerSec === 0) {
       longBeep.play();
     } else if (timer.timerSec < 5 ) {
       shortBeep.play();
+    } else if (timer.timerMin === timer.timerMinOrig && timer.timerSec === timer.timerSecOrig) {
+      longBeep.play();
     }
   };
 
@@ -117,49 +129,83 @@
   socket.on("pauseTimer", (timer) => {
     timer = timer;
     pauseTimeStamp = new Date();
-    timer.time_elapsed = ( timer.time_elapsed + ( pauseTimeStamp - startTimeStamp ) )  % (timer.timer_duration * 1000 + timer.timer_buffer * 1000);
+    timer.time_elapsed = ( timer.time_elapsed + ( pauseTimeStamp - startTimeStamp ) );
     pauseTimer();
   });
 
 
-  function initializeTimer() {
+function initializeTimer() {
+  timer.timerMinOrig = Math.floor(timer.timer_duration / 60);
+  timer.timerSecOrig = timer.timer_duration % 60;
+  timer.bufferMinOrig = Math.floor(timer.timer_buffer / 60);
+  timer.bufferSecOrig = timer.timer_buffer % 60;
+  timer.round = 1;
 
-    timer.timerMinOrig = Math.floor(timer.timer_duration / 60);
-    timer.timerSecOrig = timer.timer_duration % 60;
-    timer.bufferMinOrig = Math.floor(timer.timer_buffer / 60);
-    timer.bufferSecOrig = timer.timer_buffer % 60;
+  if (timer.time_elapsed) {
+    let timerRemaining, bufferRemaining;
+    let timerElapsedMod = timer.time_elapsed % roundTime;
 
-    if (timer.time_elapsed) {
-      let timerRemaining, bufferRemaining;
-      if (timer.time_elapsed > timer.timer_duration * 1000) {
-        timerRemaining = 0;
-        bufferRemaining = timer.buffer - (timer.time_elapsed - timer.timer_duration * 1000);
-      } else {
-        timerRemaining = timer.timer_duration * 1000 - timer.time_elapsed;
-        bufferRemaining = timer.timer_buffer * 1000;
-      }
-      timerRemaining = Math.floor( timerRemaining / 1000);
-      bufferRemaining = Math.floor( bufferRemaining / 1000);
-      timerRemaining
-      timer.timerMin = Math.floor(timerRemaining / 60);
-      timer.timerSec = timerRemaining % 60;
-      timer.bufferMin = Math.floor(bufferRemaining / 60);
-      timer.bufferSec = bufferRemaining % 60;
-    } else {
-      timer.timerMin = timer.timerMinOrig;
-      timer.timerSec = timer.timerSecOrig;
-      timer.bufferMin = timer.bufferMinOrig;
-      timer.bufferSec = timer.bufferSecOrig;
+    // Get the round number from elapsed time
+    if (timer.time_elapsed > roundTime) {
+      timer.round += Math.floor(timer.time_elapsed / roundTime);
     }
-  }
+    // Set timer and buffer from elapsed time
+    if ( timerElapsedMod < timer.timer_duration * 1000) {
+      timerRemaining = timer.timer_duration * 1000 - timerElapsedMod;
+      bufferRemaining = timer.timer_buffer * 1000;
+      timer.bufferActive = false;
+    } else if ( timerElapsedMod < roundTime ) {
+      timerRemaining = 0;
+      bufferRemaining = timer.timer_buffer * 1000 - (timerElapsedMod - timer.timer_duration * 1000);
+      timer.bufferActive = true;
+    };
+
+    timerRemaining = Math.floor( timerRemaining / 1000);
+    bufferRemaining = Math.floor( bufferRemaining / 1000);
+    timerRemaining
+    timer.timerMin = Math.floor(timerRemaining / 60);
+    timer.timerSec = timerRemaining % 60;
+    timer.bufferMin = Math.floor(bufferRemaining / 60);
+    timer.bufferSec = bufferRemaining % 60;
+  } else {
+    timer.timerMin = timer.timerMinOrig;
+    timer.timerSec = timer.timerSecOrig;
+    timer.bufferMin = timer.bufferMinOrig;
+    timer.bufferSec = timer.bufferSecOrig;
+    timer.bufferActive = false;
+}
+}
 
   function updateTimerEl() {
     if (timer.timerMin < 10) {
-      timerMinEl.innerText = zeroPad(timer.timerMin.toString());
-      timerSecEl.innerText = zeroPad(timer.timerSec.toString());
-      bufferMinEl.innerText = zeroPad(timer.bufferMin.toString());
-      bufferSecEl.innerText = zeroPad(timer.bufferSec.toString());
+      if (timer.bufferActive) {
+        timerMinEl.innerText = zeroPad(timer.bufferMin.toString());
+        timerSecEl.innerText = zeroPad(timer.bufferSec.toString());
+        timerContainerEl.style.backgroundColor = "#fffb80";
+      } else {
+        timerMinEl.innerText = zeroPad(timer.timerMin.toString());
+        timerSecEl.innerText = zeroPad(timer.timerSec.toString());
+      }
+      //bufferMinEl.innerText = zeroPad(timer.bufferMin.toString());
+      //bufferSecEl.innerText = zeroPad(timer.bufferSec.toString());
       timerRoundEl.innerText = "Round " + timer.round;
+    }
+    updateTimerBackgroundColor();
+  }
+
+  function updateTimerBackgroundColor() {
+    if (timer.bufferActive) {
+        timerContainerEl.style.backgroundColor = "#FFFB80";
+    } else {
+      if (timer.rotating_background_color) {
+        if ( timer.round % 2 === 0 ) {
+          timerContainerEl.style.backgroundColor = "#93B5FF";
+        } else {
+          timerContainerEl.style.backgroundColor = "#93FF9F";
+        }
+      } else {
+        timerContainerEl.style.backgroundColor = "#93FF9F";
+      }
     }
   }
 
@@ -182,7 +228,9 @@
 
     // set time elapsed to provide database. 
     pauseTimeStamp = new Date();
-    timer.time_elapsed = ( timer.time_elapsed + ( pauseTimeStamp - startTimeStamp ) )  % (timer.timer_duration * 1000 + timer.timer_buffer * 1000);
+    let timeDiff = pauseTimeStamp - startTimeStamp;
+    //timer.time_elapsed = ( timer.time_elapsed + timeDiff ) % roundTime;
+    timer.time_elapsed = timer.time_elapsed + timeDiff;
     timer.lookup = 'lookup';
     socket.emit('pauseTimer', timer);
     pauseTimer();
@@ -203,7 +251,10 @@
         timerStep();
         timerInterval = setInterval(timerStep, 1000);
       }, intervalDelay); 
+    // Else timer is being started for the first time and then 04:00 needs to immediately
+    // change to 03:59 and start counting from there. 
     } else {
+      timerStep();
       timerInterval = setInterval(timerStep, 1000);
     }
   }
@@ -211,20 +262,27 @@
   function timerStep() {
     if (timer.timerSec > 0) {
       timer.timerSec--;
+      timer.bufferActive = false;
     } else if (timer.timerMin > 0) {
       timer.timerMin--;
       timer.timerSec = 59;
+      timer.bufferActive = false;
     } else if (timer.bufferSec > 0) {
       timer.bufferSec--;
+      timer.bufferActive = true;
     } else if (timer.bufferMin > 0) {
       timer.bufferMin--;
       timer.bufferSec = 59;
+      timer.bufferActive = true;
     } else {
       timer.round++;
       timer.timerMin = timer.timerMinOrig;
       timer.timerSec = timer.timerSecOrig;
       timer.bufferMin = timer.bufferMinOrig;
       timer.bufferSec = timer.bufferSecOrig;
+      timer.bufferActive = false;
+      // A timer thats 04:00 should start at 03:59 so we have to initilize the round with one sec elapsed
+      timerStep();
     }
     updateTimerEl();
     playSound();
@@ -235,4 +293,8 @@
     timerInterval = null;
     console.log(timer)
   };
+
+  function toggleFullscreen() {
+    timerContainerEl.requestFullscreen()
+  }
 </script>

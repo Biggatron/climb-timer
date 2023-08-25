@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head'); %>
+</head>
+<body class="container">
+
+<header>
+  <%- include('../partials/timerHeader', {navItem: 'timerCreate'}); %>
+</header>
+
+<main>
+  <div class="jumbotron">
+    <div class="center-row-container">
+      <div class="timer-container">
+          <%- include('../../utilities/timer-input/timer-input'); %>
+      </div>
+    </div>
+    <div class="center-col-container">
+      <div class="m-2 d-grid gap-2 d-md-flex justify-content-md-center">  
+        <label for="rotateBackgroundColor">Rotate background color for odd/even rounds</label>   
+        <input id="rotateBackgroundColor" type="checkbox" class="timer-checkbox">
+      </div>
+      <div class="m-2 d-grid gap-2 d-md-flex justify-content-md-center">     
+        <button onclick="createNewTimer()">Vista</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <%- include('../partials/footer'); %>
+</footer>
+<script src="/scripts/socket.io.js"></script>
+<script>
+  var socket = io();
+</script>
+</body>
+</html>
+
+<script>
+  var user = <%- JSON.stringify(user) %>;
+  console.log(user);
+
+  function createNewTimer() {
+    console.log(document.getElementById('timerMin'));
+    let timer = parseInt(document.getElementById('timerMin').innerText) * 60 + parseInt(document.getElementById('timerSec').innerText);
+    let buffer = parseInt(document.getElementById('bufferMin').innerText) * 60 + parseInt(document.getElementById('bufferSec').innerText);
+    let rotateBackgroundColor = document.getElementById('rotateBackgroundColor').checked;
+    
+
+    let timerData = {
+      userId: user.id,
+      timer: timer,
+      buffer: buffer,
+      rotateBackgroundColor: rotateBackgroundColor
+    };
+    console.log({timerData});
+    postData('/timer/create', timerData).then(returnData => {
+      if (returnData) { // bakendi skilar timerData ef insert var successfull
+        window.location.href = '/timer/' + returnData.timer_code;
+      } else {
+        alert('creation failed')
+      }
+      console.log(returnData); // JSON data parsed by `data.json()` call
+    });
+
+/*
+    fetch("/timer/create", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"}, 
+      body: {"text": "Biggi er bestur"}
+    }).then(res => {
+      console.log("Request complete! response:", res);
+    }); */
+  }
+</script> 

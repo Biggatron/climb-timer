@@ -56,7 +56,9 @@ app.use('/comp', compRoutes);
 app.use('/timer', timerRoutes);
 
 app.get('/', (req, res) => {
-  res.render('home', {user: req.user})
+  //res.render('home', {user: req.user})
+  // Direct all traffic to timer
+    res.redirect('/timer');
 });
 
 io.on('connection', (socket) => {

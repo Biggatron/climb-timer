@@ -88,3 +88,10 @@
   display: flex;
   align-self: center;
 }
+
+@media screen and (min-width: 1200px) {
+  .timer.text {
+    font-size: 80px;
+    background-color: black;
+  }
+}

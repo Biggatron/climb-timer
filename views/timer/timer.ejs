@@ -114,7 +114,12 @@
     }
 
     if (timer.bufferActive) {
+      if (timer.bufferMin === 0 && timer.bufferSec === 0 ) {
+        longBeep.play(); // timer starts at initial-1 so sound is played when buffer reaches zero
+      }
       return;
+    } else if (timer.timerMin === timer.timerMinOrig && timer.timerSec === timer.timerSecOrig) {
+      longBeep.play(); // When initial and start timer is pressed
     } else if (timer.timerMin === 1 && timer.timerSec === 0) {
       shortBeep.play();
     } else if (timer.timerMin !== 0) {
@@ -123,8 +128,6 @@
       longBeep.play();
     } else if (timer.timerSec < 5 ) {
       shortBeep.play();
-    } else if (timer.timerMin === timer.timerMinOrig && timer.timerSec === timer.timerSecOrig) {
-      longBeep.play();
     }
   };
 
@@ -132,7 +135,7 @@
   socket.on("startTimer", (socketTimer) => {
     timer = socketTimer;
     console.log('start timer með socket')
-    startTimer();
+    startTimer(150);
   });
 
   socket.on("pauseTimer", (socketTimer) => {
@@ -247,6 +250,7 @@ function initializeTimer() {
 
   function startTimerClick() {
     socket.emit('startTimer', timer);
+    playSound();
     startTimer();
   }
 
@@ -261,7 +265,7 @@ function initializeTimer() {
     pauseTimer();
   }
 
-  function startTimer() {
+  function startTimer(delay = 0) {
     // Ef timerInterval er true þá er hann nú þegar í gangi
     if (timerInterval) return;
     
@@ -271,6 +275,7 @@ function initializeTimer() {
     // Ef það er tími liðinn þurfum við að byrja á að telja niður 
     // frá sekúndubrotinu áður en við byrjum á heilum sekúndum
     if (timer.time_elapsed) {
+      timer.time_elapsed += delay; // To make up for server client delay
       intervalDelay = 1000 - ( timer.time_elapsed % 1000 ); 
       setTimeout( () => {
         timerStep();

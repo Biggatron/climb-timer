@@ -1,3 +1,5 @@
+@import "__variables";
+
 .timer-input-container {
   display: flex;
   flex-direction: row;
@@ -6,7 +8,7 @@
   font-weight: 500;
   border: 1.5px solid black;
   border-radius: 5px;
-  background-color: rgb(245, 245, 245);
+  background-color: $secondary-background-color;
 }
 
 .timer-input {
@@ -14,11 +16,12 @@
   flex-direction: column;
   margin: 15px;
   font-size: 28px;
-}
-.timer-input p {
-  margin-top: 0px;
-  margin-bottom: 10px;
-  font-size: 24px;
+
+  p {
+    margin-top: 0px;
+    margin-bottom: 10px;
+    font-size: 24px;
+  }
 }
 
 .timer-input-text {
@@ -53,7 +56,7 @@
 }
 
 .timer-input-button:active {
-  opacity: 70%;
+  opacity: 70%; 
 }
 
 .timers-container {
@@ -78,9 +81,10 @@
 }
 
 @font-face {
-  font-family: "Mono Digit";
-  src: url("../fonts/AzeretMono-Regular.ttf");
+  font-family: 'Mono Digit';
+  src: url('../fonts/AzeretMono-Regular.ttf');
 }
+
 .timer-text {
   font-family: Mono Digit, monospace;
   font-size: 23vw;

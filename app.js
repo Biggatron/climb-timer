@@ -52,14 +52,14 @@ app.use(passport.session());
 // set up routes
 app.use('/auth', authRoutes);
 app.use('/profile', profileRoutes);
-app.use('/comp', compRoutes);
 app.use('/timer', timerRoutes);
+app.use('/', timerRoutes);
 
-app.get('/', (req, res) => {
+/* app.get('/', (req, res) => {
   //res.render('home', {user: req.user})
   // Direct all traffic to timer
     res.redirect('/timer');
-});
+}); */
 
 io.on('connection', (socket) => {
   console.log('a user connected');
@@ -73,7 +73,10 @@ io.on('connection', (socket) => {
   });
   socket.on('pauseTimer', (timer) => {
     events.pauseTimer(socket, io, timer);
-  })
+  });
+  socket.on('resetTimer', (timer) => {
+    events.resetTimer(socket, io, timer);
+  });
 });
 
 server.listen(port, () => {

@@ -1,34 +1,22 @@
-<nav class="navbar navbar-expand-lg navbar-light">
-  <ul class="navbar-nav me-auto">
-    <li class="nav-item">
-      <a class="<%= navItem === 'home' ? 'navbar-brand' : 'nav-link' %>" href="/">Forsíða</a>
+
+<nav class="navbar">
+  <ul class="navbar-group">
+    <li>
+      <a class="navbar-item <%= navItem === 'timerHome' ? 'navbar-highlight' : 'nav-link' %>" href="/">Home</a>
     </li>
-    <li class="nav-item mx-3">
-      <a class="<%= navItem === 'climbers' ? 'navbar-brand' : 'nav-link' %>" href="/comp/climbers">Klifrarar</a>
-    </li>
-    <li class="nav-item mx-3">
-      <a class="<%= navItem === 'timer' ? 'navbar-brand' : 'nav-link' %>" href="/timer/">Niðurteljari</a>
-    </li>
-    <li class="nav-item dropdown">
-      <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-        Mót
-      </a>
-      <ul class="dropdown-menu">
-        <li><a class="dropdown-item <%= navItem === 'comp' ? 'navbar-brand' : 'nav-link' %>" href="/comp/">Mín mót</a></li>
-        <li><a class="dropdown-item <%= navItem === 'newComp' ? 'navbar-brand' : 'nav-link' %>" href="/comp/create/">Nýtt mót</a></li>
-      </ul>
+    <li>
+      <a class="navbar-item <%= navItem === 'timerCreate' ? 'navbar-highlight' : 'nav-link' %>" href="/create">New timer</a>
     </li>
   </ul>
-  <ul class="navbar-nav ms-auto">
-      <li class="nav-item">
-  <% if (user) { %>
-      <a class="<%= navItem === 'profile' ? 'navbar-brand' : 'nav-link' %>" href="/profile">
+  <ul class="navbar-group">
+    <li>
+      <% if (user) { %>
+      <a class="navbar-item <%= navItem === 'profile' ? 'navbar-highlight' : 'nav-link' %>" href="/profile">
           <%= user.name %>
-          <!-- <span class="material-icons md-36 orange">account_circle</span> -->
       </a>
-  <% } else { %>
-      <a class="<%= navItem === 'login' ? 'navbar-brand' : 'nav-link' %>" href="/auth/login">Login</a>
-  <% } %>
-</li>
-</ul>
+      <% } else { %>
+      <a class="navbar-item <%= navItem === 'login' ? 'navbar-highlight' : 'nav-link' %>" href="/auth/login">Login</a>
+      <% } %>
+    </li>
+  </ul>
 </nav>

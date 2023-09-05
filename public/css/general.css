@@ -1,0 +1,242 @@
+.google-btn {
+  cursor: pointer;
+  width: 184px;
+  height: 42px;
+  background-color: #4285f4;
+  border-radius: 2px;
+  box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.25);
+}
+.google-btn a {
+  color: #fff;
+}
+.google-btn a:visited {
+  color: #fff;
+}
+.google-btn .google-icon-wrapper {
+  position: absolute;
+  margin-top: 1px;
+  margin-left: 1px;
+  width: 40px;
+  height: 40px;
+  border-radius: 2px;
+  background-color: #fff;
+}
+.google-btn .google-icon {
+  position: absolute;
+  margin-top: 11px;
+  margin-left: 11px;
+  width: 18px;
+  height: 18px;
+}
+.google-btn .btn-text {
+  float: right;
+  margin: 11px 11px 0 0;
+  color: #fff;
+  font-size: 14px;
+  letter-spacing: 0.2px;
+  font-family: "Roboto";
+}
+.google-btn:hover {
+  box-shadow: 0 0 6px #4285f4;
+}
+.google-btn:active {
+  background: #1669F2;
+}
+
+.btn {
+  background-color: rgb(237, 237, 237);
+  border: 2px solid rgb(133, 133, 133);
+  border-radius: 5px;
+  box-shadow: 1px 2px 2px rgb(173, 173, 173);
+  color: black;
+  min-width: 50px;
+  min-height: 30px;
+  padding: 5px 5px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1.2em;
+  margin: 5px;
+}
+
+.btn-icon {
+  background-color: rgb(200, 200, 200);
+  color: black;
+  padding: 24px 24px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background-color: rgb(200, 200, 200);
+}
+
+.timer-button-play {
+  background: url("/images/play.png") no-repeat center;
+  background-size: 80%;
+}
+
+.timer-button-pause {
+  background: url("/images/pause.png") no-repeat center;
+  background-size: 80%;
+}
+
+.timer-button-fullscreen {
+  background: url("/images/fullscreen.png") no-repeat center;
+  background-size: 80%;
+}
+
+.timer-button-mute {
+  background: url("/images/sound.png") no-repeat center;
+  background-size: 80%;
+}
+
+.timer-button-unmute {
+  background: url("/images/no-sound.png") no-repeat center;
+  background-size: 80%;
+}
+
+.timer-button-reset {
+  background: url("/images/reset.png") no-repeat center;
+  background-size: 80%;
+}
+
+.switch-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin: 15px 0px;
+}
+.switch-container p {
+  margin: 0px;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 34px;
+  background-color: #ccc;
+  transition: 0.4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  border-radius: 50%;
+  background-color: white;
+  transition: 0.4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  transform: translateX(16px);
+}
+
+/* Core css, HTML, Body*/
+.body-container {
+  width: 90%;
+  max-width: 1200px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.timer-find {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.input-text {
+  margin-top: auto;
+  margin-bottom: auto;
+  height: 30px;
+  vertical-align: middle;
+  font-size: 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.content-container {
+  background-color: rgb(230, 230, 230);
+  margin-bottom: 2rem;
+  padding: 2rem 1rem;
+  border-radius: 0.3rem;
+  height: auto;
+}
+
+.center-row-container {
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+}
+
+.space-between-row {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+}
+
+.center-col-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.center-self {
+  display: flex;
+  align-self: center;
+  justify-self: center;
+  flex-direction: column;
+}
+
+.container {
+  padding-top: 10px;
+}
+
+.new-timer-input-container {
+  display: block;
+}
+
+.margin-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.vertical-margin {
+  margin: 15px 0px;
+}
+
+.vertical-align-content {
+  display: flex;
+  align-items: center;
+}

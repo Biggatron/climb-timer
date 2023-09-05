@@ -17,7 +17,6 @@ module.exports = {
             code: timer.timer_code,
             startTime: startTime,
             isPaused: false,
-            pausedRound: timer.round,
             time_elapsed: timer.time_elapsed
         })
     },
@@ -28,7 +27,16 @@ module.exports = {
             code: timer.timer_code,
             startTime: null,
             isPaused: true,
-            pausedRound: timer.round,
+            time_elapsed: timer.time_elapsed
+        })
+    },
+
+    resetTimer: function (socket, io, timer) {
+        socket.broadcast.to(socket.handshake.query.timerCode).emit('resetTimer', timer);
+        updateTimer({
+            code: timer.timer_code,
+            startTime: null,
+            isPaused: true,
             time_elapsed: timer.time_elapsed
         })
     }
@@ -37,7 +45,7 @@ module.exports = {
 async function updateTimer(timer) {
     console.log(timer);
     const result = await query(
-        'UPDATE timer SET is_paused = $2, start_time = $3, paused_round = $4, time_elapsed = $5 where timer_code = $1 RETURNING *',
-        [timer.code, timer.isPaused, timer.startTime, timer.pausedRound, timer.time_elapsed]
+        'UPDATE timer SET is_paused = $2, start_time = $3, time_elapsed = $4 where timer_code = $1 RETURNING *',
+        [timer.code, timer.isPaused, timer.startTime, timer.time_elapsed]
     );
 }

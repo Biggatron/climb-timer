@@ -1,0 +1,86 @@
+@import "__variables";
+@import "__buttons";
+
+/* Core css, HTML, Body*/
+.body-container {
+  width: 90%;
+  max-width: 1200px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.timer-find {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.input-text {
+  margin-top: auto;
+  margin-bottom: auto;
+  height: 30px;
+  vertical-align: middle;
+  font-size: 16px;
+
+}
+
+.full-width {
+  width: 100%;
+}
+
+.content-container {
+  background-color: $main-background-color;
+  margin-bottom: 2rem;
+  padding: 2rem 1rem;
+  border-radius: 0.3rem;
+  height: auto;
+}
+
+
+.center-row-container {
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+}
+
+.space-between-row {
+display: flex;
+justify-content: space-between;
+flex-direction: row;
+}
+
+.center-col-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.center-self {
+  display: flex;
+  align-self: center;
+  justify-self: center;
+  flex-direction: column;
+}
+
+.container {
+  padding-top: 10px;
+}
+
+.new-timer-input-container {
+  display: block;
+}
+
+.margin-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.vertical-margin {
+  margin: 15px 0px;
+}
+
+.vertical-align-content {
+  display: flex;
+  align-items: center;
+}

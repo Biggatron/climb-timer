@@ -2,42 +2,47 @@
 <html lang="en">
 <head>
   <%- include('../partials/head'); %>
+  <link rel="stylesheet" href="/css/table.css" type="text/css">
 </head>
-<body class="container">
+<body class="body-container">
 
 <header>
-  <%- include('../partials/header', {navItem: 'timer'}); %>
+  <%- include('../partials/header', {navItem: 'timerHome'}); %>
 </header>
 
 <main>
-  <div class="jumbotron">
-    <div class="timer-container">
+  <div class="content-container">
+    <div>
+      <div class="space-between-row">
         <div class="timer-find">
-            <label for="inputTimerCode">Finna niðurteljara með kóða:</label>
-            <input id="inputTimerCode" type="text" maxlength="4" minlength="4">
-            <button onClick="searchTimer()">Leita</button>
+            <input id="inputTimerSearchString" type="text" class="input-text">
+            <button class="btn" onClick="searchTimer()">Search</button>
         </div>
-        <a href="/timer/create">Nýr niðurteljari</a>
+        <div><a href="/create"><button class="btn">New timer</button></a></div>
+      </div>
     </div>
-    <div class="timers-list">
-      <table id="timerListId" class="table table-hover">
+    <div class="">
+      <table id="timerListId" class="">
+        <caption>Public timers</caption>
         <thead>
           <tr>
-            <th scope="col">#</th>
+            <th scope="col">Timer name</th>
             <th scope="col">Code</th>
-            <th scope="col">Competition</th>
-            <th scope="col">Timer</th>
-            <th scope="col">Buffer</th>
+            <th scope="col">Round duration</th>
+            <th scope="col">Buffer duration</th>
+            <th scope="col">Status</th>
+            <th scope="col">Round</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="timerTable">
           <% for (var i=0; i<timers.length; i++) { %>
             <tr style=" cursor: pointer;">
-              <th scope="row"><%= i+1 %></th>
+              <td><%= timers[i].timer_name %></td>
               <td><%= timers[i].timer_code %></td>
-              <td><%= timers[i].comp === undefined ? 'No comp' : timers[i].comp %></td>
               <td><%= timers[i].timerDurationText %></td>
               <td><%= timers[i].bufferDurationText %></td>
+              <td><%= timers[i].status %></td>
+              <td><%= timers[i].round %></td>
             </tr>
             <%= console.log(timers) %>
         <% } %>
@@ -58,12 +63,32 @@
   addRowHandlers();
 
   function searchTimer() {
-    let timerCode = document.getElementById('inputTimerCode').value;
-    
-    getData('/timer/' + timerCode).then(returnData => {
-      console.log(returnData); // JSON data parsed by `data.json()` call
+    let timerTableEl = document.getElementById("timerTable");
+    let searchString = document.getElementById('inputTimerSearchString').value;
+    console.log("Executing timer search with string: " + searchString);
+    getData('/search?filters[timerName]=' + searchString).then(timers => {
+      console.log("Search returned " + timers.length + " timers");
+      timerTableEl.innerHTML = "";
+      let timerLineEl = document.createElement("tr");
+      timerLineEl.style.cursor = "pointer";
+      for (let i = 0; i < timers.length; i++) {
+        timerLineEl.innerHTML = "";
+        timerLineEl.appendChild(createTableFieldElement(timers[i].timer_name));
+        timerLineEl.appendChild(createTableFieldElement(timers[i].timer_code));
+        timerLineEl.appendChild(createTableFieldElement(timers[i].timerDurationText));
+        timerLineEl.appendChild(createTableFieldElement(timers[i].bufferDurationText));
+        timerLineEl.appendChild(createTableFieldElement(timers[i].status));
+        timerLineEl.appendChild(createTableFieldElement(timers[i].round));
+        timerTableEl.appendChild(timerLineEl.cloneNode(true));
+      }
+      addRowHandlers();
     });
-
+  }
+  
+  function createTableFieldElement(value) {
+    let tableFieldEl = document.createElement("td");
+    tableFieldEl.innerText = value;
+    return tableFieldEl;
   }
 
   function addRowHandlers() {
@@ -73,12 +98,21 @@
     var currentRow = table.rows[i];
     var createClickHandler = function(row) {
       return function() {
-        var cell = row.getElementsByTagName("td")[0];
+        var cell = row.getElementsByTagName("td")[1];
         var code = cell.innerHTML;
-        location.href = '/timer/' + code;
+        location.href = '/' + code;
       };
     };
     currentRow.onclick = createClickHandler(currentRow);
   }
 }
+
+// Enable search on Enter keypress<
+document.getElementById("inputTimerSearchString").addEventListener("keydown", (event) => {
+  let activeElId = document.activeElement.id;
+  if (event.keyCode === 13) { // 13 = enter
+    searchTimer();
+  }
+})
+
 </script>

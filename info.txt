@@ -1,1 +1,0 @@
-Run in dev with nodemon: npm run start

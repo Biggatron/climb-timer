@@ -31,7 +31,7 @@ passport.deserializeUser(async (id, done) => {
 passport.use(new GoogleStrategy({
     clientID: keys.google.clientID,
     clientSecret: keys.google.clientSecret,
-    callbackURL:"http://localhost:3000/auth/google/redirect",
+    callbackURL:keys.google.callbackURL,
     passReqToCallback:true
   },
   async function(request, accessToken, refreshToken, profile, done) {

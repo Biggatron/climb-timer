@@ -3,16 +3,59 @@
 <head>
   <%- include('./partials/head'); %>
   <link rel="stylesheet" href="/css/profile.css" type="text/css">
+  <link rel="stylesheet" href="/css/table.css" type="text/css">
 </head>
-<body class="container">
+<body class="body-container">
 
 <header>
   <%- include('./partials/header', {navItem: 'profile'}); %>
 </header>
 
 <main>
-  <div class="jumbotron">
-    <h1>Welcome to your profile, <%= user.name %></h1>
+  <div class="content-container">
+    <div class="space-between-row vertical-align-content">
+      <h1>Welcome to your profile, <%= user.name.split(' ').shift() %></h1>
+      <div><a href="/auth/logout"><button class="btn">Logout</button></a></div>
+    </div>
+    <!-- <div>
+      <div class="space-between-row">
+        <div class="timer-find">
+            <input id="inputTimerSearchString" type="text" class="input-text">
+            <button class="btn" onClick="searchTimer()">Search</button>
+        </div>
+        <div><a href="/create"><button class="btn">New timer</button></a></div>
+      </div>
+    </div> -->
+    <% if (timers.length !== 0) { %>
+      <div class="">
+        <table id="timerListId" class="">
+          <caption>Your timers</caption>
+          <thead>
+            <tr>
+              <th scope="col">Timer name</th>
+              <th scope="col">Code</th>
+              <th scope="col">Round duration</th>
+              <th scope="col">Buffer duration</th>
+              <th scope="col">Status</th>
+              <th scope="col">Round</th>
+            </tr>
+          </thead>
+          <tbody id="timerTable">
+            <% for (var i=0; i<timers.length; i++) { %>
+              <tr style=" cursor: pointer;">
+                <td><%= timers[i].timer_name %></td>
+                <td><%= timers[i].timer_code %></td>
+                <td><%= timers[i].timerDurationText %></td>
+                <td><%= timers[i].bufferDurationText %></td>
+                <td><%= timers[i].status %></td>
+                <td><%= timers[i].round %></td>
+              </tr>
+              <%= console.log(timers) %>
+              <% } %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
   </div>
 </main>
 

@@ -82,9 +82,10 @@
   })
 
   var soundOn = false;
-  var timerContainerEl = document.getElementById("timer-container");
   var shortBeep = document.getElementById("shortBeep");
   var longBeep = document.getElementById("longBeep");
+  var timerContainerEl = document.getElementById("timer-container");
+  timerContainerEl.addEventListener("fullscreenchange", fullcreenChanged);
 
   var roundTime = timer.timer_duration * 1000 + timer.timer_buffer * 1000;
   var timerInterval;
@@ -336,7 +337,20 @@ function initializeTimer() {
   };
 
   function toggleFullscreen() {
+    let timerTextEls = timerContainerEl.children;
+    for (let i = 0; i < timerTextEls.length; i++) {
+      timerTextEls[i].classList.add("timer-text-fullscreen");
+    }
     timerContainerEl.requestFullscreen();
+  }
+
+  function fullcreenChanged(even) {
+    if (!document.fullscreenElement) {
+      let timerTextEls = timerContainerEl.children;
+      for (let i = 0; i < timerTextEls.length; i++) {
+        timerTextEls[i].classList.remove("timer-text-fullscreen");
+      }
+    }
   }
 
   function toggleSound() {

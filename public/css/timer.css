@@ -81,17 +81,24 @@
   font-family: "Mono Digit";
   src: url("../fonts/AzeretMono-Regular.ttf");
 }
-.timer-text {
-  font-family: Mono Digit, monospace;
-  font-size: 23vw;
-  font-weight: 700;
-  display: flex;
-  align-self: center;
-}
-
-@media screen and (min-width: 1200px) {
-  .timer.text {
-    font-size: 80px;
-    background-color: black;
+@media screen and (max-width: 1400px) {
+  .timer-text {
+    font-family: Mono Digit, monospace;
+    font-size: 23vw;
+    font-weight: 700;
+    display: flex;
+    align-self: center;
   }
+}
+@media screen and (min-width: 1400px) {
+  .timer-text {
+    font-family: Mono Digit, monospace;
+    font-size: 300px;
+    font-weight: 700;
+    display: flex;
+    align-self: center;
+  }
+}
+.timer-text-fullscreen {
+  font-size: 25vw;
 }

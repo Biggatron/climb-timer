@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <%- include('./partials/head'); %>
-  <link rel="stylesheet" href="/css/profile.css" type="text/css">
   <link rel="stylesheet" href="/css/table.css" type="text/css">
 </head>
 <body class="body-container">
@@ -65,3 +64,23 @@
 
 </body>
 </html>
+
+<script>
+  addRowHandlers();
+
+  function addRowHandlers() {
+  var table = document.getElementById("timerListId");
+  var rows = table.getElementsByTagName("tr");
+  for (i = 0; i < rows.length; i++) {
+    var currentRow = table.rows[i];
+    var createClickHandler = function(row) {
+      return function() {
+        var cell = row.getElementsByTagName("td")[1];
+        var code = cell.innerHTML;
+        location.href = '/' + code;
+      };
+    };
+    currentRow.onclick = createClickHandler(currentRow);
+  }
+}
+</script>

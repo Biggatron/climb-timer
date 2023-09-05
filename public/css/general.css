@@ -188,7 +188,7 @@ input:checked + .slider:before {
 .content-container {
   background-color: rgb(230, 230, 230);
   margin-bottom: 2rem;
-  padding: 2rem 1rem;
+  padding: 2rem 2rem;
   border-radius: 0.3rem;
   height: auto;
 }

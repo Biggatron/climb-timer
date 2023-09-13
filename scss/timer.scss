@@ -26,6 +26,10 @@
 
 .timer-input-text {
   margin: 5px;
+  &.number{
+    min-width: 35.61px;
+    text-align: right;
+  }
 }
 
 .timer-input-time-container {
@@ -107,4 +111,8 @@
 
 .timer-text-fullscreen {
   font-size: 25vw;
+}
+
+[contenteditable] {
+  outline: 0px solid transparent;
 }

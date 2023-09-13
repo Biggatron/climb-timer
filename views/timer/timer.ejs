@@ -23,15 +23,16 @@
             <div class="timer-text" id="timerSec"></div>
           </div>
           <div class="space-between-row timer-controls-container">
-            <button id="toggleSoundButton" class="btn btn-icon timer-button-unmute" onClick="toggleSound()"></button>
+            <button title="Sound On/off" id="toggleSoundButton" class="btn btn-icon timer-button-unmute" onClick="toggleSound()"></button>
             <% if (!user) { %>
             <% } else if (user.id===timer.user_id) { %>
               <div class="center-row-container">
-                <button id="toggleTimerButton" class="btn btn-icon timer-button-play" onClick="toggleTimer()"></button>
-                <button id="resetTimerButton" class="btn btn-icon timer-button-reset" onClick="resetTimer()"></button>
+                <button title="Sync connected timers" id="syncTimersButton" class="btn btn-icon timer-button-sync" onClick="syncToConnectedTimers()"></button>
+                <button title="Play/Pause" id="toggleTimerButton" class="btn btn-icon timer-button-play" onClick="toggleTimer()"></button>
+                <button title="Initialize timer" id="resetTimerButton" class="btn btn-icon timer-button-reset" onClick="resetTimer()"></button>
               </div>
             <% } %>
-            <button id="toggleTimerFullscreen" class="btn btn-icon timer-button-fullscreen" onClick="toggleFullscreen()"></button>
+            <button title="Toggle Fullscreen" id="toggleTimerFullscreen" class="btn btn-icon timer-button-fullscreen" onClick="toggleFullscreen()"></button>
           </div>
         </div>
       </div>
@@ -65,21 +66,11 @@
 
   var socket = io({
     query: {
-      timerCode: timer.timer_code
+      timerCode: timer.timer_code,
+      userId : user.id,
+      timerUserId : timer.user_id
     }
   });
-
-  document.addEventListener("keydown", (event) => {
-    // 32 = space, 80 = p, f = 70, m = 77
-    if (event.keyCode === 32 || event.keyCode === 80) {
-      toggleTimer();
-      return;
-    } else if (event.keyCode === 70) {
-      toggleFullscreen();
-    } else if (event.keyCode === 77) {
-      toggleSound();
-    }
-  })
 
   var soundOn = false;
   var shortBeep = document.getElementById("shortBeep");
@@ -132,7 +123,6 @@
     }
   };
 
-
   socket.on("startTimer", (socketTimer) => {
     timer = socketTimer;
     console.log('start timer með socket')
@@ -142,10 +132,40 @@
   socket.on("pauseTimer", (socketTimer) => {
     timer = socketTimer;
     console.log("Pause timer með socket")
-    pauseTimeStamp = new Date();
-    timer.time_elapsed = ( timer.time_elapsed + ( pauseTimeStamp - startTimeStamp ) );
     pauseTimer();
   });
+
+  socket.on("syncTimer", (socketTimer) => {
+    console.log('Timer synced from master')
+    timer = socketTimer;
+    updateTimerEl();
+    if (timer.is_paused) {
+      pauseTimer();
+    } else {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      startTimer(150);
+    }
+  });
+
+socket.on("syncRequest", (socketTimer) => {
+  // Only master timer will answer sync request
+  if ( user.id !== timer.user_id ) { return };
+  console.log('SyncRequest answered');
+  syncToConnectedTimers();
+});
+
+function syncToConnectedTimers() {
+    if (timer.is_paused) {
+      socket.emit('syncTimer', timer);
+    } else {
+      let tempTimer = structuredClone(timer);
+      let currTimeStamp = new Date();
+      let timeDiff = currTimeStamp - startTimeStamp;
+      tempTimer.time_elapsed = timer.time_elapsed + timeDiff;
+      socket.emit('syncTimer', tempTimer);
+    }
+}
 
   socket.on("resetTimer", (socketTimer) => {
     timer = socketTimer;
@@ -155,7 +175,6 @@
     initializeTimer();
     updateTimerEl();
   });
-
 
 function initializeTimer() {
   timer.timerMinOrig = Math.floor(timer.timer_duration / 60);
@@ -259,7 +278,6 @@ function initializeTimer() {
     // set time elapsed to provide database. 
     pauseTimeStamp = new Date();
     let timeDiff = pauseTimeStamp - startTimeStamp;
-    //timer.time_elapsed = ( timer.time_elapsed + timeDiff ) % roundTime;
     timer.time_elapsed = timer.time_elapsed + timeDiff;
     timer.lookup = 'lookup';
     socket.emit('pauseTimer', timer);
@@ -267,18 +285,33 @@ function initializeTimer() {
   }
 
   function startTimer(delay = 0) {
-    // Ef timerInterval er true þá er hann nú þegar í gangi
+    // If interval exists then the timer is already running. 
     if (timerInterval) return;
     
-    // vistum timestamp til að reikna út liðinn tíma seinna 
+    console.log('Starting timer with ' + delay + ' ms delay');
+    
+    // Save timestamp to calculate elapsed time on next pause. 
     startTimeStamp = new Date();
+    // Set timer as started
+    timer.is_paused = false;
+    // To make up for server client delay
+    timer.time_elapsed += delay; 
 
-    // Ef það er tími liðinn þurfum við að byrja á að telja niður 
-    // frá sekúndubrotinu áður en við byrjum á heilum sekúndum
+    // If time has passed then we need to start the interval at the next whole second.
+    // For example if time elapsed is 15200ms then we'll wait for 800ms to start the 
+    // interval that will then update the timer every whole second. 
     if (timer.time_elapsed) {
-      timer.time_elapsed += delay; // To make up for server client delay
       intervalDelay = 1000 - ( timer.time_elapsed % 1000 ); 
+
+      // If provided network delay is larger than the intervalDelay then that means
+      // that the delay pushed the timer passed the current second.
+      if (delay > intervalDelay) {
+        console.log('Timer should be a second behind master, but it isnt?')
+      } 
+
       setTimeout( () => {
+        // If timer was synced while timeout was active then this should be aborted
+        if (timerInterval) return;
         timerStep();
         timerInterval = setInterval(timerStep, 1000);
       }, intervalDelay); 
@@ -328,6 +361,7 @@ function initializeTimer() {
   function pauseTimer() {
     clearInterval(timerInterval);
     timerInterval = null;
+    timer.is_paused = true;
 
     // Uppfæra play/pause takka
     if (user.id === timer.user_id) {
@@ -371,7 +405,19 @@ function initializeTimer() {
     updateTimerEl();
     socket.emit('resetTimer', timer);
     pauseTimer();
-    
-    
   }
+
+  
+  document.addEventListener("keydown", (event) => {
+    // 32 = space, 80 = p, f = 70, m = 77
+    if (event.keyCode === 32 || event.keyCode === 80) {
+      toggleTimer();
+      return;
+    } else if (event.keyCode === 70) {
+      toggleFullscreen();
+    } else if (event.keyCode === 77) {
+      toggleSound();
+    }
+  })
+
 </script>

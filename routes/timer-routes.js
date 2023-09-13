@@ -78,7 +78,7 @@ async function getTimer(res, req) {
 async function searchTimers(res, req) { 
     let searchString = req.query.filters.timerName;
     let user = req.user;
-    console.log("Query timer: " + searchString);
+    console.log("Search query timer: " + searchString);
     const result = await query(
         `SELECT * FROM timer WHERE is_public = true AND ( LOWER(timer_code) LIKE LOWER('%${searchString}%') or LOWER(timer_name) LIKE LOWER('%${searchString}%') )`
     );

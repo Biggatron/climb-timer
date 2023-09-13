@@ -99,6 +99,11 @@
   background-size: 80%;
 }
 
+.timer-button-sync {
+  background: url("/images/sync2.png") no-repeat center;
+  background-size: 80%;
+}
+
 .switch-container {
   display: flex;
   flex-direction: row;
@@ -239,4 +244,8 @@ input:checked + .slider:before {
 .vertical-align-content {
   display: flex;
   align-items: center;
+}
+
+hr.solid {
+  border-top: 1px solid rgb(150, 150, 150);
 }

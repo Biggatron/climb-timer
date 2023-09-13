@@ -26,8 +26,9 @@
             <span class="slider"></span>
           </label>
         </div>
+        <hr class="solid">
         <div class="switch-container">
-          <p>Visibile for everyone</p> 
+          <p>Public</p> 
           <label class="switch">
             <input id="isPublic" type="checkbox" checked>
             <span class="slider"></span>
@@ -83,14 +84,5 @@
       }
       console.log(returnData); // JSON data parsed by `data.json()` call
     });
-
-/*
-    fetch("/timer/create", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"}, 
-      body: {"text": "Biggi er bestur"}
-    }).then(res => {
-      console.log("Request complete! response:", res);
-    }); */
   }
 </script> 

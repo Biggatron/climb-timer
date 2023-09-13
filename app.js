@@ -41,7 +41,7 @@ app.use(express.json());
 // set up session cookies
 app.use(cookieSession({
   name: 'google-auth-session',
-  maxAge: 24 * 60 * 60 * 1000,
+  maxAge: 365 * 24 * 60 * 60 * 1000,
   keys: [keys.session.cookieKey]
 }));
 
@@ -62,20 +62,26 @@ app.use('/', timerRoutes);
 }); */
 
 io.on('connection', (socket) => {
-  console.log('a user connected');
   events.joinRoom(socket);
+
+  // Client Events
   socket.on('disconnect', () => {
     console.log('user disconnected');
+    events.disconnectUser(socket);
   });
   socket.on('startTimer', (timer) => {
     console.log('user started timer ' + timer.timer_code);
     events.startTimer(socket, io, timer);
   });
   socket.on('pauseTimer', (timer) => {
+    console.log('user paused timer ' + timer.timer_code);
     events.pauseTimer(socket, io, timer);
   });
   socket.on('resetTimer', (timer) => {
     events.resetTimer(socket, io, timer);
+  });
+  socket.on('syncTimer', (timer) => {
+    events.syncTimer(socket, io, timer);
   });
 });
 

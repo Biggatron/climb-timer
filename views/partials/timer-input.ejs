@@ -7,9 +7,9 @@
             <button class="timer-input-button" onclick="increaseTimerSeconds()">+</button>
         </div>
         <div class="timer-input-time-container">
-            <div id="timerMin" class="timer-input-text">00</div>
+            <div id="timerMin" class="timer-input-text number">00</div>
             <div class="timer-input-text">:</div>
-            <div id="timerSec" class="timer-input-text">00</div>
+            <div id="timerSec" class="timer-input-text number">00</div>
         </div>
         <div class="timer-input-buttons-container">
             <button class="timer-input-button" onclick="decreaseTimerMinutes()">-</button>
@@ -23,9 +23,9 @@
             <button class="timer-input-button" onclick="increaseBufferSeconds()">+</button>
         </div>
         <div class="timer-input-time-container">
-            <div id="bufferMin" class="timer-input-text">00</div>
+            <div id="bufferMin" class="timer-input-text number">00</div>
             <div class="timer-input-text">:</div>
-            <div id="bufferSec" class="timer-input-text">00</div>
+            <div id="bufferSec" class="timer-input-text number">00</div>
         </div>
         <div class="timer-input-buttons-container">
             <button class="timer-input-button" onclick="decreaseBufferMinutes()">-</button>
@@ -36,7 +36,7 @@
 </div>
 
 <script>
-    var step = 15;
+    var secondStep = 15;
 
     var timer = {
         minutes: 0,
@@ -55,10 +55,74 @@
         seconds: '00'
     }
 
+    // Generate mapping from keycodes to numbers
+    var keyCodes = [];
+    for (let i=0; i<10; i++) {
+        // Numbers 0-9 have keycodes 48-57
+        let keyCodeValuePair = {
+            keyCode: i + 48,
+            value: "" + i
+        }
+        keyCodes.push(keyCodeValuePair)
+        // Numpad number 96-95
+        keyCodeValuePair = {
+            keyCode: i + 96,
+            value: "" + i
+        }
+        keyCodes.push(keyCodeValuePair)
+    }
+
     var timerMinEl = document.getElementById('timerMin');
     var timerSecEl = document.getElementById('timerSec');
     var bufferMinEl = document.getElementById('bufferMin');
     var bufferSecEl = document.getElementById('bufferSec');
+
+    // Add event listener to edit time manually
+    var enteredTime;
+    var currentTime;
+    var elBeingEditied;
+    let inputFields = document.querySelectorAll('#timerMin, #timerSec, #bufferMin, #bufferSec');
+    for (let i=0; i<inputFields.length; i++) {
+        // Set clicked input field as editable
+        inputFields[i].addEventListener('click', (el) => {
+            console.log('element clicked')
+            elBeingEditied= el.target;
+            elBeingEditied.contentEditable = true;
+            //selectElementContents(elBeingEditied);
+            enteredTime = "00";
+            currentTime = elBeingEditied.innerText;
+        });
+        // Handle keypresses in inputfield
+        inputFields[i].addEventListener("keydown", (event) => {
+            let keyCodePair = keyCodes.find(pair => pair.keyCode === event.keyCode);
+            let currentText = elBeingEditied.innerText; 
+            if (keyCodePair) {
+                // Ignor input if current length is 2 and text is not higlighted
+                if (elBeingEditied.innerText.length === 2) {
+                    let selection = window.getSelection().toString();
+                    // Check if selection could be a part of current el value.
+                    // I don't see how a user could select another text while keeping the cursor on text being edited
+                    if (!elBeingEditied.innerText.includes(selection) || !selection) {
+                        event.preventDefault();
+                    }
+                } else if ( (currentText + keyCodePair.value) > 60) {
+                    // Ignore input if it makes total higher than 60
+                    event.preventDefault();
+                } 
+            } else if ( event.keyCode === 46 || 
+                        event.keyCode ===  8 || 
+                        event.keyCode === 37 || 
+                        event.keyCode === 39 ) { 
+                // Backspace, delete, right and left arrow keys
+                // No need to intervene
+            } else {
+                // Key pressed is not a number, backspace, delete or left or right arrow key
+                // We ignore keypress.
+                event.preventDefault();
+            }
+        })
+
+    }
 
     // Timer events
     function increaseTimerMinutes() {
@@ -88,8 +152,6 @@
         decreaseSeconds(buffer, bufferString, bufferMinEl, bufferSecEl)
     }
 
-
-
     function increaseMinutes(timeObj,stringObj, el) {
         if (timeObj.minutes < 99) ++timeObj.minutes;
         updateMinutes(timeObj, stringObj, el);
@@ -101,26 +163,32 @@
     }
 
     function increaseSeconds(timeObj,stringObj, elMin, elSec) {
-        if ((timeObj.seconds + step) === 60) {
+        timeObj.seconds -= timeObj.seconds % secondStep;
+        if ((timeObj.seconds + secondStep) === 60) {
             if (timeObj.minutes < 99 ) {
                 ++timeObj.minutes;
                 timeObj.seconds = 0;
             }
         } else {
-            timeObj.seconds += step;
+            timeObj.seconds += secondStep;
         }
         updateMinutes(timeObj, stringObj, elMin);
         updateSeconds(timeObj, stringObj, elSec);
     }
 
     function decreaseSeconds(timeObj, stringObj, elMin, elSec) {
-        if ((timeObj.seconds - step) < 0) {
+        let modSeconds = timeObj.seconds % secondStep
+        if (modSeconds !== 0) {
+            timeObj.seconds -= timeObj.seconds % secondStep;
+            timeObj.seconds += secondStep;
+        }
+        if ((timeObj.seconds - secondStep) < 0) {
             if (timeObj.minutes > 0 ) {
                 --timeObj.minutes;
-                timeObj.seconds = 60 - step;
+                timeObj.seconds = 60 - secondStep;
             }
         } else {
-            timeObj.seconds -= step;
+            timeObj.seconds -= secondStep;
         }
         updateMinutes(timeObj, stringObj, elMin);
         updateSeconds(timeObj, stringObj, elSec);
@@ -148,4 +216,49 @@
         var zero = 2 - num.toString().length + 1;
         return Array(+(zero > 0 && zero)).join("0") + num;
     }
+
+    function selectElementContents(el) {
+        let range = document.createRange();
+        range.selectNodeContents(el);
+        let sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+    }
+
+    // updates timer/buffer json object once user has manually inputed text
+    function updateTimerObject(el) {
+        if (!el) { return 0; };
+        switch (el.id) {
+            case "timerMin":
+                timer.minutes = parseInt(el.innerText);
+                timerString.minutes = el.innerText;
+                break;
+            case "timerSec":
+                timer.seconds = parseInt(el.innerText);
+                timerString.seconds = el.innerText;
+                break;
+            case "bufferMin":
+                buffer.minutes = parseInt(el.innerText);
+                bufferString.minutes = el.innerText;
+                break;
+            case "bufferSec":
+                buffer.seconds = parseInt(el.innerText);
+                bufferString.seconds = el.innerText;
+                break;
+        }
+    }
+
+    // Event to handle when user clicks away from editable timer text
+    addEventListener("mousedown", (event) => {
+        if (!elBeingEditied){ return 0; }; // If no element is being edited then nothing needs to be done
+        if (event.target === elBeingEditied) { return 0; }; // If element being edited was clicked then nothing needs to be done
+        if (elBeingEditied.innerText.length === 0) {
+            elBeingEditied.innerText = "00"; 
+        } else if (elBeingEditied.innerText.length === 1) {
+            elBeingEditied.innerText = "0" + elBeingEditied.innerText;
+        }
+        updateTimerObject(elBeingEditied);
+        elBeingEditied.contentEditable = false;
+        elBeingEditied = null;
+    });
 </script>

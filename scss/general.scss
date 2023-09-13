@@ -84,3 +84,7 @@ flex-direction: row;
   display: flex;
   align-items: center;
 }
+
+hr.solid {
+  border-top: 1px solid $main-dark-gray;
+}

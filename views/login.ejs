@@ -18,6 +18,17 @@
         </div>
         <p class="btn-text"><a href="/auth/google">Sign in with google</a></p>
       </div>
+      <p>or</p>
+      <div class="center-col-container">
+        <div class="center-row-container">
+          <input class="input-text" id="email" type="text" autocomplete="email" placeholder="Email">
+        </div>
+        <div class="center-row-container">
+          <input class="input-text" id="password" type="password" autocomplete="password" placeholder="Password">
+        </div>
+        <button class="btn" onClick="login()">Login</button>
+      </div>
+      Don't have an account yet?<a href="/auth/signup">Click here to signup!</a>
     </div>
   </div>
   </div>
@@ -29,3 +40,21 @@
 
 </body>
 </html>
+<script>
+
+  function login() {
+    let email = document.getElementById('email').value;
+    let password = document.getElementById('password').value;
+    
+    let user = {
+      email: email,
+      password: password
+    }
+
+    postData('/auth/local/login', user).then(response => {
+      if (response.status === 401) {
+        alert(response.message);
+      }
+    });
+  }
+</script>

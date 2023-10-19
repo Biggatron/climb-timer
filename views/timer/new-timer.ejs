@@ -45,10 +45,6 @@
 <footer>
   <%- include('../partials/footer'); %>
 </footer>
-<script src="/scripts/socket.io.js"></script>
-<script>
-  var socket = io();
-</script>
 </body>
 </html>
 
@@ -76,13 +72,13 @@
       isPublic: isPublic
     };
     console.log({timerData});
-    postData('/create', timerData).then(returnData => {
-      if (returnData) { // bakendi skilar timerData ef insert var successfull
-        window.location.href = '/' + returnData.timer_code;
+    postData('/create', timerData).then(response => {
+      if (response.timer_code) { // bakendi skilar timerData ef insert var successfull
+        window.location.href = '/' + response .timer_code;
       } else {
         alert('creation failed')
       }
-      console.log(returnData); // JSON data parsed by `data.json()` call
+      console.log(response); // JSON data parsed by `data.json()` call
     });
   }
 </script> 

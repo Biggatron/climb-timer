@@ -3,6 +3,8 @@ CREATE TABLE user_account (
     google_id varchar(32),
     email varchar(128),
     name varchar(64),
+    hashed_password bytea,
+    salt bytea,
     create_timestamp timestamp,
     modify_timestamp timestamp
 );

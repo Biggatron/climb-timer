@@ -1,6 +1,9 @@
 const passport = require('passport');
 const query = require('../db/db');
 const GoogleStrategy = require('passport-google-oauth2').Strategy;
+const LocalStrategy = require('passport-local').Strategy;
+const crypto  = require('crypto');
+
 const keys = require('./keys');
   
 passport.serializeUser((user , done) => {
@@ -22,6 +25,7 @@ passport.deserializeUser(async (id, done) => {
       name : result.rows[0].name,
       email : result.rows[0].email
     };
+    console.log(user);
     done(null, user);
   } else {
     done('authError', null);
@@ -46,8 +50,8 @@ passport.use(new GoogleStrategy({
       console.log(profile)
       // User does not exist a new one is created
       const result = await query(
-        'INSERT INTO user_account (google_id, name, email) VALUES ($1, $2, $3) RETURNING *',
-        [profile.id, profile.displayName, profile.email]
+        'INSERT INTO user_account (google_id, name, email, create_timestamp) VALUES ($1, $2, $3, $4) RETURNING *',
+        [profile.id, profile.displayName, profile.email, new Date()]
       );
       if (result.rows.length === 0) {
           res.status(500).json({
@@ -67,7 +71,45 @@ passport.use(new GoogleStrategy({
         email : result.rows[0].email
       };
     }
-
     return done(null, user);
+  }
+));
+
+passport.use(new LocalStrategy({
+  usernameField: 'email',
+  passwordField: 'password'
+}, async (username, password, done) => {
+    // Check if user exists in database
+    console.log('Signing in user:')
+    let email = username;
+    console.log({ email: email,
+                  password: password});
+    const result = await query(
+      'SELECT * FROM user_account WHERE email = $1',
+      [email]
+    );
+    if (!result.rows[0]) {
+      return done(null, false, { message: 'Incorrect username or password.' });
+    };
+    let row = result.rows[0];
+    let user = {
+      id : result.rows[0].id,
+      name : result.rows[0].name,
+      email : result.rows[0].email,
+    };
+
+    // Validate password
+    console.log({salt: row.salt});
+    crypto.pbkdf2(password, row.salt, 310000, 32, 'sha256', function(err, hashedPassword) {
+      if (err) { return cb(err); }
+      console.log({
+        db: row.hashed_password,
+        provided: hashedPassword
+      })
+      if (!crypto.timingSafeEqual(row.hashed_password, hashedPassword)) {
+        return done(null, false, { message: 'Incorrect username or password.' });
+      }
+      return done(null, user);    
+    });
   }
 ));

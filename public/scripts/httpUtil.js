@@ -14,7 +14,11 @@ async function postData(url = '', data = {}) {
     body: JSON.stringify(data) // body data type must match "Content-Type" header
   });
   console.log({response})
-  return response.json(); // parses JSON response into native JavaScript objects
+  if (response.redirected) {
+    window.location.href = response.url;
+  } else {
+    return response.json(); // parses JSON response into native JavaScript objects
+  }
 }
 
 async function getData(url = '') {
@@ -30,7 +34,11 @@ async function getData(url = '') {
     redirect: 'follow', // manual, *follow, error
     referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
   });
-  return response.json(); // parses JSON response into native JavaScript objects
+  if (response.redirected) {
+    return response;
+  } else {
+    return response.json(); // parses JSON response into native JavaScript objects
+  }
 }
 
 /* Það hlýtur að vera hægt að checka hvort get response-ið sé html, ef svo er þá redirecta á server renderaða síðu.  */

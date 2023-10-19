@@ -9,6 +9,7 @@ const timerRoutes = require('./routes/timer-routes');
 const passportSetup = require('./config/passport')
 const keys = require('./config/keys');
 const events = require('./events/socket');
+const errorHandler = require('./utilities/errorHandler');
 
 const app = express();
 const server = http.createServer(app);
@@ -49,11 +50,23 @@ app.use(cookieSession({
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Handle passport deserializion errors
+app.use(function(err, req, res, next) {
+  if (err) {
+      req.logout();
+      res.redirect('/');
+  } else {
+      next();
+  }
+});
+
 // set up routes
 app.use('/auth', authRoutes);
 app.use('/profile', profileRoutes);
 app.use('/timer', timerRoutes);
 app.use('/', timerRoutes);
+
+app.use(errorHandler);
 
 /* app.get('/', (req, res) => {
   //res.render('home', {user: req.user})

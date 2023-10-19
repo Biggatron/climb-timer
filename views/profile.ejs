@@ -69,14 +69,15 @@
   addRowHandlers();
 
   function addRowHandlers() {
-  var table = document.getElementById("timerListId");
-  var rows = table.getElementsByTagName("tr");
+  let table = document.getElementById("timerListId");
+  if (!table) {return};
+  let rows = table.getElementsByTagName("tr");
   for (i = 0; i < rows.length; i++) {
-    var currentRow = table.rows[i];
-    var createClickHandler = function(row) {
+    let currentRow = table.rows[i];
+    let createClickHandler = function(row) {
       return function() {
-        var cell = row.getElementsByTagName("td")[1];
-        var code = cell.innerHTML;
+        let cell = row.getElementsByTagName("td")[1];
+        let code = cell.innerHTML;
         location.href = '/' + code;
       };
     };

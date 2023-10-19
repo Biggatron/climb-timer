@@ -45,8 +45,8 @@ async function createTimer(req, res) {
     );
     if (result.rows[0]) {
         console.log({timerCreated: result.rows})
-        res.status(200).json(result.rows[0]);
-        /* res.redirect('/timer/' + timer.code); // redirect virkar ekki */
+        //res.status(200).json(result.rows[0]);
+        res.redirect('/' + timer.code); // redirect virkar ekki */
     } else {
         res.sendStatus(500);
     }

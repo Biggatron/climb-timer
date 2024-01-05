@@ -24,14 +24,11 @@
           </div>
           <div class="space-between-row timer-controls-container">
             <button title="Sound On/off" id="toggleSoundButton" class="btn btn-icon timer-button-unmute" onClick="toggleSound()"></button>
-            <% if (!user) { %>
-            <% } else if (user.id===timer.user_id) { %>
-              <div class="center-row-container">
-                <button title="Sync connected timers" id="syncTimersButton" class="btn btn-icon timer-button-sync" onClick="syncToConnectedTimers()"></button>
-                <button title="Play/Pause" id="toggleTimerButton" class="btn btn-icon timer-button-play" onClick="toggleTimer()"></button>
-                <button title="Initialize timer" id="resetTimerButton" class="btn btn-icon timer-button-reset" onClick="resetTimer()"></button>
-              </div>
-            <% } %>
+            <div class="center-row-container" id="timerOwnerButtons">
+              <button title="Sync connected timers" id="syncTimersButton" class="btn btn-icon timer-button-sync" onClick="syncToConnectedTimers()"></button>
+              <button title="Play/Pause" id="toggleTimerButton" class="btn btn-icon timer-button-play" onClick="toggleTimer()"></button>
+              <button title="Initialize timer" id="resetTimerButton" class="btn btn-icon timer-button-reset" onClick="resetTimer()"></button>
+            </div>
             <button title="Toggle Fullscreen" id="toggleTimerFullscreen" class="btn btn-icon timer-button-fullscreen" onClick="toggleFullscreen()"></button>
           </div>
         </div>
@@ -52,17 +49,19 @@
 </html>
 
 <script>
-  let timer, user;
-  // if ( <% - user !== undefined %> ) {
-    user = '<%- JSON.stringify(user) %>';
+  let timer, user, ownedTimers; // ownedTimers list timers owned be logged out user
+  user = '<%- JSON.stringify(user) %>';
   if (user) {
     user = JSON.parse(user);
   }
 
-  //if ( <% - timer !== undefined %> ) {
-    timer = `<%- JSON.stringify(timer) %>`;
-    timer = JSON.parse(timer);
-  //}
+  timer = `<%- JSON.stringify(timer) %>`;
+  timer = JSON.parse(timer);
+
+  ownedTimers = '<%- JSON.stringify(ownedTimers) %>';
+  if (ownedTimers) {
+    ownedTimers = JSON.parse(ownedTimers);
+  }
 
   let socket = io({
     query: {
@@ -97,11 +96,22 @@
   let toggleTimerButton = document.getElementById('toggleTimerButton');
   let toggleSoundButton = document.getElementById('toggleSoundButton');
 
+  setTimerOwnerButtons();
+
   initializeTimer();
   updateTimerEl();
   if (!timer.is_paused) { 
     startTimer();
   };
+
+  function setTimerOwnerButtons() {
+    // If userID does not match timer userID and timer does not belong to clients temp timers
+    // then control buttons are removed
+    if (user.id !== timer.user_id && !ownedTimers.includes(timer.timer_code)) {
+      let timerOwnerButtonContainer = document.getElementById("timerOwnerButtons");
+      timerOwnerButtonContainer.innerHTML = '';
+    } 
+  }
 
   function playSound() {
     // If sound is off then leave function
@@ -313,21 +323,28 @@ function initializeTimer() {
         console.log('Timer should be a second behind master, but it isnt?')
       } 
 
+      // If time_elapsed is equal to the delay then timer is being started from initial and 
+      // then 04:00 needs to immediately change to 03:59 and start counting from there. 
+      if (timer.time_elapsed === delay) {
+        timerStep();
+      } 
+
       setTimeout( () => {
         // If timer was synced while timeout was active then this should be aborted
         if (timerInterval) return;
         timerStep();
         timerInterval = setInterval(timerStep, 1000);
       }, intervalDelay); 
-    // Else timer is being started for the first time and then 04:00 needs to immediately
-    // change to 03:59 and start counting from there. 
+    // If time elapsed 
     } else {
+      // Else timer is being started for the first time and then 04:00 needs to immediately
+      // change to 03:59 and start counting from there. 
       timerStep();
       timerInterval = setInterval(timerStep, 1000);
     }
 
     // Uppfæra play/pause takka
-    if (user.id === timer.user_id) {
+    if (user.id === timer.user_id || ownedTimers.includes(timer.timer_code)) {
       toggleTimerButton.classList.add('timer-button-pause');
       toggleTimerButton.classList.remove('timer-button-play');
     }
@@ -368,7 +385,7 @@ function initializeTimer() {
     timer.is_paused = true;
 
     // Uppfæra play/pause takka
-    if (user.id === timer.user_id) {
+    if (user.id === timer.user_id || ownedTimers.includes(timer.timer_code)) {
       toggleTimerButton.classList.add('timer-button-play');
       toggleTimerButton.classList.remove('timer-button-pause');
     }

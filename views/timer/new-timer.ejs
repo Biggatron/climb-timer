@@ -14,7 +14,11 @@
     <div class="center-col-container">
       <div class="new-timer-input-container"> 
         <div class="center-row-container"> 
-          <input id="timerNameInput" type="text" class="input-text full-width" placeholder="<%= user.name.split(' ').shift() %>'s timer">
+          <% if(user){ %>
+            <input id="timerNameInput" type="text" class="input-text full-width" placeholder="<%= user.name.split(' ').shift() %>'s timer">
+          <% } else { %>  
+            <input id="timerNameInput" type="text" class="input-text full-width" placeholder="Timer name">
+         <% } %>
         </div>
         <div class="center-row-container vertical-margin">
           <%- include('../partials/timer-input'); %>
@@ -49,7 +53,14 @@
 </html>
 
 <script>
-  var user = <%- JSON.stringify(user) %>;
+  let user = { 
+    id: null,
+    name: null
+  };
+  let userJson = '<%- JSON.stringify(user) %>';
+  if (userJson) {
+    user = JSON.parse(userJson); 
+  }
   console.log(user);
 
   function createNewTimer() {
@@ -60,7 +71,11 @@
     let isPublic = document.getElementById('isPublic').checked;
     let timerName = document.getElementById('timerNameInput').value;
     if (timerName === '') {
-      timerName = user.name.split(' ').shift() + `'s timer`;
+      if (user.name) {
+        timerName = user.name.split(' ').shift() + `'s timer`;
+      } else {
+        timerName = 'New timer';
+      }
     }
 
     let timerData = {

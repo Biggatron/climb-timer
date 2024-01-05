@@ -18,7 +18,7 @@ router.get('/search', (req, res) => {
     searchTimers(res, req);
 });
 
-router.get('/create', authCheck, (req, res) => {
+router.get('/create', (req, res) => {
     res.render('timer/new-timer', { user: req.user });
 });
 
@@ -46,6 +46,11 @@ async function createTimer(req, res) {
     if (result.rows[0]) {
         console.log({timerCreated: result.rows})
         //res.status(200).json(result.rows[0]);
+        if (req.session.timers) {
+            req.session.timers.push(timer.code);
+        } else {
+            req.session.timers = [timer.code];
+        }
         res.redirect('/' + timer.code); // redirect virkar ekki */
     } else {
         res.sendStatus(500);
@@ -68,7 +73,7 @@ async function getTimer(res, req) {
             let timeElapsedFromStart = new Date() - timer.start_time;
             timer.time_elapsed += timeElapsedFromStart;
         }
-        res.render('timer/timer', { timer: timer, user: user });
+        res.render('timer/timer', { timer: timer, user: user, ownedTimers: req.session.timers  });
     } else {
         res.sendStatus(404);
     }

@@ -88,3 +88,14 @@ flex-direction: row;
 hr.solid {
   border-top: 1px solid $main-dark-gray;
 }
+
+.vertical-shrink-center-container {
+  display: flex;
+  flex-direction: row;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.display-none {
+  display: none !important;
+}

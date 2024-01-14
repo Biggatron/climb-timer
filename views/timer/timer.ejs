@@ -15,19 +15,47 @@
   <main>
     <div class="content-container">
       <div class="center-col-container">
-        <h1 class="center-self" id="timerRound">Round 1</h1>
         <div class="timers-container">
-          <div class="timer-text-container" id="timer-container">
-            <div class="timer-text" id="timerMin"></div>
-            <div class="timer-text">:</div>
-            <div class="timer-text" id="timerSec"></div>
+          <div class="space-between-row timer-controls-container">
+            <div class="dropdown settings-dropdown">
+              <button title="Settings" id="settingsButton" class="btn btn-icon timer-button-settings" onClick="openSettings()"></button>  
+              <div id="settingsDropdown" class="settings-dropdown-content">
+                <button title="Toggle Milliseconds" id="toggleMillisecondsButton" class="dropdown-button" onClick="toggleMilliseconds()">  
+                  <span class="btn-icon timer-button-milliseconds dropdown-icon"></span>
+                  <p id="toggleMillisecondsText">Show milliseconds</p>
+                </button>
+                <button title="Show Round on fullscreen" id="toggleRoundsOnFullscreen" class="dropdown-button" onClick="toggleFullscreenRound()">  
+                  <span class="btn-icon timer-button-fullscreen-round dropdown-icon"></span>
+                  <p id="toggleFullscreenRoundText">Hide Round on fullscreen</p>
+                </button>
+                <button title="Sync connected timers" id="syncTimersButton" class="dropdown-button" onClick="syncToConnectedTimers()">  
+                  <span class="btn-icon timer-button-sync dropdown-icon"></span>
+                  <p>Sync connected timers</p>
+                </button>
+                <button title="Initialize timer" id="resetTimerButton" class="dropdown-button" onClick="resetTimer()">  
+                  <span class="btn-icon timer-button-reset dropdown-icon"></span>
+                  <p>Reset timer</p>
+                </button>
+              </div>
+            </div>
+            <h1 class="center-self " id="timerRound">Round 1</h1>
+            <div></div>
+          </div>
+          <div class="timer-container" id="timer-container">
+            <h1 class="display-none" id="fullscreenTimerRound">Round 1</h1>
+            <div class="timer-text-container">
+              <div class="vertical-shrink-center-container" id="timer-text-container">
+                <div class="timer-text" id="timerMin"></div>
+                <div class="timer-text">:</div>
+                <div class="timer-text" id="timerSec"></div>
+                <div class="timer-text timer-text-ms display-none" id="timerMil"></div>
+              </div>
+            </div>
           </div>
           <div class="space-between-row timer-controls-container">
             <button title="Sound On/off" id="toggleSoundButton" class="btn btn-icon timer-button-unmute" onClick="toggleSound()"></button>
-            <div class="center-row-container" id="timerOwnerButtons">
-              <button title="Sync connected timers" id="syncTimersButton" class="btn btn-icon timer-button-sync" onClick="syncToConnectedTimers()"></button>
+            <div class="center-row-container" id="timerOwnerButtons"> 
               <button title="Play/Pause" id="toggleTimerButton" class="btn btn-icon timer-button-play" onClick="toggleTimer()"></button>
-              <button title="Initialize timer" id="resetTimerButton" class="btn btn-icon timer-button-reset" onClick="resetTimer()"></button>
             </div>
             <button title="Toggle Fullscreen" id="toggleTimerFullscreen" class="btn btn-icon timer-button-fullscreen" onClick="toggleFullscreen()"></button>
           </div>
@@ -75,26 +103,37 @@
   let isNoSleepActive = false;
 
   var soundOn = false;
+  var showFullscreenRound = true;
+  var millisecondsOn = false;
   var shortBeep = document.getElementById("shortBeep");
   var longBeep = document.getElementById("longBeep");
+  var timerTextContainerEl = document.getElementById("timer-text-container");
   var timerContainerEl = document.getElementById("timer-container");
   timerContainerEl.addEventListener("fullscreenchange", fullscreenChanged);
   timerContainerEl.addEventListener("fullscreenchange", enableNoSleep);
 
   var roundTime = timer.timer_duration * 1000 + timer.timer_buffer * 1000;
+  var roundTimeSec = Math.floor(roundTime / 1000);
   var timerInterval;
-  var intervalDelay;
+  var intervalDelay;  
   var startTimeStamp;
   var pauseTimeStamp;
 
   let timerMinEl = document.getElementById('timerMin');
   let timerSecEl = document.getElementById('timerSec');
-  let bufferMinEl = document.getElementById('bufferMin');
-  let bufferSecEl = document.getElementById('bufferSec');
+  let timerMilEl = document.getElementById('timerMil');
   let timerRoundEl = document.getElementById('timerRound');
 
   let toggleTimerButton = document.getElementById('toggleTimerButton');
   let toggleSoundButton = document.getElementById('toggleSoundButton');
+  let fullscreenTimerRoundEl = document.getElementById("fullscreenTimerRound");
+  
+  // To keep track on sec update
+  let prevTimer = {
+    timerMin: 0,
+    timerSec: 0,
+    bufferSec: 0
+  }
 
   setTimerOwnerButtons();
 
@@ -108,8 +147,12 @@
     // If userID does not match timer userID and timer does not belong to clients temp timers
     // then control buttons are removed
     if (user.id !== timer.user_id && !ownedTimers.includes(timer.timer_code)) {
-      let timerOwnerButtonContainer = document.getElementById("timerOwnerButtons");
-      timerOwnerButtonContainer.innerHTML = '';
+      let toggleTimerButtonEl = document.getElementById("toggleTimerButton");
+      toggleTimerButtonEl.remove();
+      let syncTimerButtonEl = document.getElementById("syncTimersButton");
+      syncTimerButtonEl.remove();
+      let resetTimerButtonEl = document.getElementById("resetTimerButton");
+      resetTimerButtonEl.remove();
     } 
   }
 
@@ -119,7 +162,10 @@
       return;
     }
 
-    if (timer.bufferActive) {
+    
+    if ( (prevTimer.timerSec === 0 && prevTimer.timerMin === 0 && timer.timerSec !== 0 ) || (prevTimer.bufferSec !== timer.bufferSec && timer.bufferSec ===(timer.bufferSecOrig - 1)) ) {
+      longBeep.play();
+    } else if (timer.bufferActive) {
       if (timer.bufferMin === 0 && timer.bufferSec === 0 ) {
         longBeep.play(); // timer starts at initial-1 so sound is played when buffer reaches zero
       }
@@ -130,8 +176,6 @@
       shortBeep.play();
     } else if (timer.timerMin !== 0) {
       return;
-    } else if (timer.timerSec === 0) {
-      longBeep.play();
     } else if (timer.timerSec < 5 ) {
       shortBeep.play();
     }
@@ -218,33 +262,43 @@ function initializeTimer() {
 
     timerRemaining = Math.floor( timerRemaining / 1000);
     bufferRemaining = Math.floor( bufferRemaining / 1000);
-    timerRemaining
     timer.timerMin = Math.floor(timerRemaining / 60);
     timer.timerSec = timerRemaining % 60;
     timer.bufferMin = Math.floor(bufferRemaining / 60);
     timer.bufferSec = bufferRemaining % 60;
+    timer.timerMil = 1000 - (timer.time_elapsed % 1000);
   } else {
     timer.timerMin = timer.timerMinOrig;
     timer.timerSec = timer.timerSecOrig;
     timer.bufferMin = timer.bufferMinOrig;
     timer.bufferSec = timer.bufferSecOrig;
+    timer.timerMil = 0; 
     timer.bufferActive = false;
+  }
+
+  if (millisecondsOn) {
+    timerMilEl.classList.remove('display-none');
   }
 }
 
   function updateTimerEl() {
+    // Displaying 1000 ms will cause elements to jitter. 
+    if (timer.timerMil === 1000) {
+      timer.timerMil = 999;
+    }
+
     if (timer.timerMin < 10) {
       if (timer.bufferActive) {
-        timerMinEl.innerText = zeroPad(timer.bufferMin.toString());
-        timerSecEl.innerText = zeroPad(timer.bufferSec.toString());
+        timerMinEl.innerText = zeroPad(timer.bufferMin.toString(), 2);
+        timerSecEl.innerText = zeroPad(timer.bufferSec.toString(), 2);
         timerContainerEl.style.backgroundColor = "#fffb80";
       } else {
-        timerMinEl.innerText = zeroPad(timer.timerMin.toString());
-        timerSecEl.innerText = zeroPad(timer.timerSec.toString());
+        timerMinEl.innerText = zeroPad(timer.timerMin.toString(), 2);
+        timerSecEl.innerText = zeroPad(timer.timerSec.toString(), 2);
       }
-      //bufferMinEl.innerText = zeroPad(timer.bufferMin.toString());
-      //bufferSecEl.innerText = zeroPad(timer.bufferSec.toString());
+      timerMilEl.innerText = zeroPad(timer.timerMil.toString(), 3);
       timerRoundEl.innerText = "Round " + timer.round;
+      fullscreenTimerRoundEl.innerText = "Round " + timer.round;
     }
     updateTimerBackgroundColor();
   }
@@ -265,9 +319,11 @@ function initializeTimer() {
     }
   }
 
-  function zeroPad(num) {
-    if (num.length === 1) {
+  function zeroPad(num, len) {
+    if (len - num.length === 1) {
       return "0" + num;
+    } else if (len - num.length === 2) {
+      return "00" + num;
     } else {
       return num;
     }
@@ -311,7 +367,10 @@ function initializeTimer() {
     // To make up for server client delay
     timer.time_elapsed += delay; 
 
-    // If time has passed then we need to start the interval at the next whole second.
+    timerStep();
+    timerInterval = setInterval(timerStep, 20);
+
+/*     // If time has passed then we need to start the interval at the next whole second.
     // For example if time elapsed is 15200ms then we'll wait for 800ms to start the 
     // interval that will then update the timer every whole second. 
     if (timer.time_elapsed) {
@@ -333,15 +392,15 @@ function initializeTimer() {
         // If timer was synced while timeout was active then this should be aborted
         if (timerInterval) return;
         timerStep();
-        timerInterval = setInterval(timerStep, 1000);
+        timerInterval = setInterval(timerStep, 20);
       }, intervalDelay); 
     // If time elapsed 
     } else {
       // Else timer is being started for the first time and then 04:00 needs to immediately
       // change to 03:59 and start counting from there. 
       timerStep();
-      timerInterval = setInterval(timerStep, 1000);
-    }
+      timerInterval = setInterval(timerStep, 20);
+    } */
 
     // Uppfæra play/pause takka
     if (user.id === timer.user_id || ownedTimers.includes(timer.timer_code)) {
@@ -351,6 +410,33 @@ function initializeTimer() {
   }
 
   function timerStep() {
+    // Only play sound if seccond if updated
+    prevTimer.timerMin = timer.timerMin; 
+    prevTimer.timerSec = timer.timerSec; 
+    prevTimer.bufferSec = timer.bufferSec;
+
+    let timeElapsedMil = new Date() - startTimeStamp + timer.time_elapsed;
+    let timeElapsedsec = Math.floor(timeElapsedMil / 1000);
+    let timeLeftOfRound = roundTimeSec - (timeElapsedsec % roundTimeSec);
+    timer.timerMil = 1000 - (timeElapsedMil % 1000);
+    timer.round = Math.floor(timeElapsedsec / roundTimeSec) + 1;
+    if (timeLeftOfRound > timer.timer_buffer) {
+      let timerRemaining = timeLeftOfRound - timer.timer_buffer - 1;
+      timer.timerMin = Math.floor(timerRemaining / 60);
+      timer.timerSec = timerRemaining % 60;
+      timer.bufferActive = false;
+    } else {
+      timer.bufferMin = Math.floor(timeLeftOfRound / 60);
+      timer.bufferSec = timeLeftOfRound % 60 - 1;
+      timer.bufferActive = true;
+    }
+    updateTimerEl();
+    if (prevTimer.timerSec !== timer.timerSec || prevTimer.bufferSec !== timer.bufferSec) {
+      playSound();
+    }
+  }
+
+  function timerStepOld() {
     if (timer.timerSec > 0) {
       timer.timerSec--;
       timer.bufferActive = false;
@@ -392,19 +478,39 @@ function initializeTimer() {
   };
 
   function toggleFullscreen() {
-    let timerTextEls = timerContainerEl.children;
+    let timerTextEls = timerTextContainerEl.children;
     for (let i = 0; i < timerTextEls.length; i++) {
-      timerTextEls[i].classList.add("timer-text-fullscreen");
+      if (timerTextEls[i].id === "timerMil") {
+        timerTextEls[i].classList.add("timer-text-fullscreen-mil");
+      } else {
+        timerTextEls[i].classList.add("timer-text-fullscreen");
+      }
     }
-    timerContainerEl.requestFullscreen();
+
+    // Birta Rounds í fullscreen
+    if (showFullscreenRound) {
+      fullscreenTimerRoundEl.classList.remove("display-none");
+    }
+
+    //if (iOS()) {
+    //  timerContainerEl.webkitEnterFullscreen();
+    //} else {
+      timerContainerEl.requestFullscreen();
+    //}
   }
 
   function fullscreenChanged(event) {
     if (!document.fullscreenElement) {
-      let timerTextEls = timerContainerEl.children;
+      let timerTextEls = timerTextContainerEl.children;
       for (let i = 0; i < timerTextEls.length; i++) {
-        timerTextEls[i].classList.remove("timer-text-fullscreen");
+        if (timerTextEls[i].id === "timerMil") {
+          timerTextEls[i].classList.remove("timer-text-fullscreen-mil");
+        } else {
+          timerTextEls[i].classList.remove("timer-text-fullscreen");
+        }
       }
+      // Fela rounds þegar 
+      fullscreenTimerRoundEl.classList.add("display-none");
       disableNoSleep();
     } else {
       enableNoSleep();
@@ -432,6 +538,19 @@ function initializeTimer() {
     return check;
   };
 
+  function iOS() {
+    return [
+      'iPad Simulator',
+      'iPhone Simulator',
+      'iPod Simulator',
+      'iPad',
+      'iPhone',
+      'iPod'
+    ].includes(navigator.platform)
+    // iPad on iOS 13 detection
+    || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+  }
+
   function toggleSound() {
     if (soundOn) {
       soundOn = false;
@@ -451,6 +570,49 @@ function initializeTimer() {
     socket.emit('resetTimer', timer);
     pauseTimer();
   }
+
+  function toggleMilliseconds() {
+    let toggleMillisecondsTextEl = document.getElementById("toggleMillisecondsText");
+    if (millisecondsOn) {
+      millisecondsOn = false;
+      toggleMillisecondsTextEl.innerText = "Show milliseconds";
+      timerMilEl.classList.add('display-none');
+    } else {
+      millisecondsOn = true;
+      toggleMillisecondsTextEl.innerText = "Hide milliseconds";
+      timerMilEl.classList.remove('display-none');
+    }
+    console.log(millisecondsOn)
+  }
+  
+  function toggleFullscreenRound() {
+    let toggleFullscreenRoundTextEl = document.getElementById("toggleFullscreenRoundText");
+    if (showFullscreenRound) {
+      showFullscreenRound = false;
+      toggleFullscreenRoundTextEl.innerText = "Show Round on fullscreen";
+    } else {
+      showFullscreenRound = true;
+      toggleFullscreenRoundTextEl.innerText = "Hide Round on fullscreen";
+    }
+  }
+
+  function openSettings() {
+    document.getElementById("settingsDropdown").classList.toggle("show");
+  }
+  
+// Close the dropdown menu if the user clicks outside of it
+window.onclick = function(event) {
+  if (!event.target.matches('.timer-button-settings')) {
+    var dropdowns = document.getElementsByClassName("settings-dropdown-content");
+    var i;
+    for (i = 0; i < dropdowns.length; i++) {
+      var openDropdown = dropdowns[i];
+      if (openDropdown.classList.contains('show')) {
+        openDropdown.classList.remove('show');
+      }
+    }
+  }
+}
   
   document.addEventListener("keydown", (event) => {
     // 32 = space, 80 = p, f = 70, m = 77

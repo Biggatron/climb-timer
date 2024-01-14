@@ -71,27 +71,45 @@
   display: flex;
   flex-direction: row;
   justify-content: center;
+}
+
+.timer-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
   border-style: solid;
   border-radius: 1em;
   border-width: 4px;
   width: 100%;
+  margin-top: auto;
+  margin-bottom: auto;
 }
 
 .timer-controls-container {
   width: 100%;
+  margin-top: 10px;
 }
 
 @font-face {
   font-family: "Mono Digit";
   src: url("../fonts/AzeretMono-Regular.ttf");
 }
+@font-face {
+  font-family: "Mono Digit Bold";
+  src: url("../fonts/AzeretMono-Bold.ttf");
+}
 @media screen and (max-width: 1400px) {
   .timer-text {
-    font-family: Mono Digit, monospace;
+    font-family: Mono Digit Bold, monospace;
     font-size: 23vw;
-    font-weight: 700;
     display: flex;
     align-self: center;
+  }
+  .timer-text-ms {
+    font-size: 20px;
+    margin-top: auto;
+    margin-bottom: 5%;
   }
 }
 @media screen and (min-width: 1400px) {
@@ -102,9 +120,18 @@
     display: flex;
     align-self: center;
   }
+  .timer-text-ms {
+    font-size: 20px;
+    margin-top: auto;
+    margin-bottom: 5%;
+  }
 }
 .timer-text-fullscreen {
   font-size: 25vw;
+}
+
+.timer-text-fullscreen-mil {
+  font-size: 2vw;
 }
 
 [contenteditable] {

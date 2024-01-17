@@ -9,10 +9,13 @@ async function main() {
   // Add columns
   try {
     await query(
-      'ALTER TABLE user_account ADD COLUMN hashed_password bytea'
+      'ALTER TABLE timer ADD COLUMN main_color char(7)'
     );
     await query(
-      'ALTER TABLE user_account ADD COLUMN salt bytea'
+      'ALTER TABLE timer ADD COLUMN secondary_color char(7)'
+    );
+    await query(
+      'ALTER TABLE timer ADD COLUMN buffer_color char(7)'
     );
   } catch (e) {
     console.error('Error while adding columns', e.message)

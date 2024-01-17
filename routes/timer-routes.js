@@ -40,8 +40,8 @@ async function createTimer(req, res) {
         return 0;
     }
     const result = await query(
-        'INSERT INTO timer (create_time, timer_code, timer_name, user_id, timer_duration, timer_buffer, is_public, rotating_background_color) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
-        [timer.createTime, timer.code, timer.name, timer.userId, timer.timer, timer.buffer, timer.isPublic, timer.rotateBackgroundColor]
+        'INSERT INTO timer (create_time, timer_code, timer_name, user_id, timer_duration, timer_buffer, is_public, rotating_background_color, main_color, secondary_color, buffer_color) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *',
+        [timer.createTime, timer.code, timer.name, timer.userId, timer.timer, timer.buffer, timer.isPublic, timer.rotateBackgroundColor, timer.mainColor, timer.secondaryColor, timer.bufferColor]
     );
     if (result.rows[0]) {
         console.log({timerCreated: result.rows})

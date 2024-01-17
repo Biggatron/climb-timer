@@ -24,19 +24,31 @@
           <%- include('../partials/timer-input'); %>
         </div>
         <div class="switch-container">
+          <p>Public</p> 
+          <label class="switch">
+            <input id="isPublic" type="checkbox" checked>
+            <span class="slider"></span>
+          </label>
+        </div>  
+        <hr class="solid">
+        <div class="switch-container">
           <p>Rotate timer color</p> 
           <label class="switch">
             <input id="rotateBackgroundColor" type="checkbox" checked>
             <span class="slider"></span>
           </label>
         </div>
-        <hr class="solid">
+        <div class="switch-container" id="mainColorContainer">
+          <p>Main color</p> 
+          <input id="mainColorInput" type="color" value="#93ff9f">
+        </div>  
+        <div class="switch-container" id="secondaryColorContainer">
+          <p>Secondary color</p> 
+          <input id="secondaryColorInput" type="color" value="#93b5ff">
+        </div>  
         <div class="switch-container">
-          <p>Public</p> 
-          <label class="switch">
-            <input id="isPublic" type="checkbox" checked>
-            <span class="slider"></span>
-          </label>
+          <p>Buffer color</p> 
+          <input id="bufferColorInput" type="color" value="#fffb80">
         </div>  
         <div class="center-row-container">
           <button class="btn center-self" onclick="createNewTimer()">Create timer</button>
@@ -63,13 +75,40 @@
   }
   console.log(user);
 
+  let rotateBackgroundColorEl = document.getElementById("rotateBackgroundColor");
+  let mainColorContainerEl = document.getElementById("mainColorContainer");
+  let secondaryColorContainerEl = document.getElementById("secondaryColorContainer");
+  let bufferColorInputEl = document.getElementById("bufferColorInput");
+
+  rotateBackgroundColorEl.addEventListener("change", toggleRotateBackgroundColor);
+
+  // Initialization
+  toggleRotateBackgroundColor();
+
+  function toggleRotateBackgroundColor() {
+    if (rotateBackgroundColorEl.checked) {
+      secondaryColorContainerEl.classList.remove("display-none");
+    } else {
+      secondaryColorContainerEl.classList.add("display-none");
+    }
+  }
+
   function createNewTimer() {
-    console.log(document.getElementById('timerMin'));
     let timer = parseInt(document.getElementById('timerMin').innerText) * 60 + parseInt(document.getElementById('timerSec').innerText);
     let buffer = parseInt(document.getElementById('bufferMin').innerText) * 60 + parseInt(document.getElementById('bufferSec').innerText);
     let rotateBackgroundColor = document.getElementById('rotateBackgroundColor').checked;
     let isPublic = document.getElementById('isPublic').checked;
     let timerName = document.getElementById('timerNameInput').value;
+    
+    let mainColor = document.getElementById("mainColorInput").value;
+    let secondaryColor = document.getElementById("secondaryColorInput").value;
+    let bufferColor = document.getElementById("bufferColorInput").value;
+
+    if (timer === 0 && buffer === 0) {
+      showToast("Timer cannot be 00:00")
+      return;
+    }
+
     if (timerName === '') {
       if (user.name) {
         timerName = user.name.split(' ').shift() + `'s timer`;
@@ -83,8 +122,11 @@
       timer: timer,
       name: timerName,
       buffer: buffer,
+      isPublic: isPublic,
       rotateBackgroundColor: rotateBackgroundColor,
-      isPublic: isPublic
+      mainColor: mainColor,
+      secondaryColor: secondaryColor,
+      bufferColor: bufferColor
     };
     console.log({timerData});
     postData('/create', timerData).then(response => {

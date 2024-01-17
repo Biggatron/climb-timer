@@ -291,7 +291,6 @@ function initializeTimer() {
       if (timer.bufferActive) {
         timerMinEl.innerText = zeroPad(timer.bufferMin.toString(), 2);
         timerSecEl.innerText = zeroPad(timer.bufferSec.toString(), 2);
-        timerContainerEl.style.backgroundColor = "#fffb80";
       } else {
         timerMinEl.innerText = zeroPad(timer.timerMin.toString(), 2);
         timerSecEl.innerText = zeroPad(timer.timerSec.toString(), 2);
@@ -305,17 +304,25 @@ function initializeTimer() {
 
   function updateTimerBackgroundColor() {
     if (timer.bufferActive) {
-        timerContainerEl.style.backgroundColor = "#FFFB80";
+        timerContainerEl.style.backgroundColor = timer.buffer_color || "#FFFB80";
     } else {
       if (timer.rotating_background_color) {
         if ( timer.round % 2 === 0 ) {
-          timerContainerEl.style.backgroundColor = "#93B5FF";
+          timerContainerEl.style.backgroundColor = timer.secondary_color ||"#93B5FF";
         } else {
-          timerContainerEl.style.backgroundColor = "#93FF9F";
+          timerContainerEl.style.backgroundColor = timer.main_color || "#93FF9F";
         }
       } else {
-        timerContainerEl.style.backgroundColor = "#93FF9F";
+        timerContainerEl.style.backgroundColor = timer.main_color || "#93FF9F";
       }
+    }
+    let timerTextEls = document.getElementsByClassName("timer-text");
+    let textColor = pickTextColorBasedOnBgColor(timerContainerEl.style.backgroundColor, "#000000", "#ffffff");
+    for (let i = 0; i < timerTextEls.length; i++) {
+      timerTextEls[i].style.color = textColor;
+    }
+    if (showFullscreenRound) {
+      fullscreenTimerRoundEl.style.color = textColor;
     }
   }
 

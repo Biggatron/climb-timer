@@ -18,10 +18,10 @@ async function main() {
       'ALTER TABLE timer ADD COLUMN buffer_color char(7)'
     );
     await query(
-      'ALTER TABLE timer ADD COLUMN visit_count integer'
+      'ALTER TABLE timer ADD COLUMN visit_count integer default 0'
     );
     await query(
-      'ALTER TABLE timer ADD COLUMN last_visit_time timestamp'
+      'ALTER TABLE timer ADD COLUMN last_visit_time timestamp default current_timestamp'
     );
   } catch (e) {
     console.error('Error while adding columns', e.message)

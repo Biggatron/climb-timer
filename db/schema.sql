@@ -24,6 +24,6 @@ CREATE TABLE timer (
     secondary_color char(7,)
     buffer_color char(7,)
     visit_count integer default 0,
-    last_visit_time timestamp,
+    last_visit_time timestamp default current_timestamp,
     time_elapsed integer -- Time elapsed current round on pause
 );

@@ -22,6 +22,32 @@
       </div>
     </div>
     <div class="">
+      <table id="popularTimerListId" class="">
+        <caption>Popular timers</caption>
+        <thead>
+          <tr>
+            <th scope="col">Timer name</th>
+            <th scope="col">Code</th>
+            <th scope="col">Round duration</th>
+            <th scope="col">Buffer duration</th>
+            <th scope="col">Status</th>
+            <th scope="col">Round</th>
+          </tr>
+        </thead>
+        <tbody id="popularTimerTable">
+          <% for (var i=0; i<popularTimers.length; i++) { %>
+            <tr style=" cursor: pointer;">
+              <td><%= popularTimers[i].timer_name %></td>
+              <td><%= popularTimers[i].timer_code %></td>
+              <td><%= popularTimers[i].timerDurationText %></td>
+              <td><%= popularTimers[i].bufferDurationText %></td>
+              <td><%= popularTimers[i].status %></td>
+              <td><%= popularTimers[i].round %></td>
+            </tr>
+            <%= console.log(popularTimers) %>
+        <% } %>
+        </tbody>
+      </table>
       <table id="timerListId" class="">
         <caption>Public timers</caption>
         <thead>
@@ -60,7 +86,8 @@
 </html>
 
 <script>
-  addRowHandlers();
+  addRowHandlers("timerListId");
+  addRowHandlers("popularTimerListId");
 
   function searchTimer() {
     let timerTableEl = document.getElementById("timerTable");
@@ -81,7 +108,8 @@
         timerLineEl.appendChild(createTableFieldElement(timers[i].round));
         timerTableEl.appendChild(timerLineEl.cloneNode(true));
       }
-      addRowHandlers();
+      addRowHandlers("timerListId");
+      addRowHandlers("popularTimerListId");
     });
   }
   
@@ -91,8 +119,8 @@
     return tableFieldEl;
   }
 
-  function addRowHandlers() {
-  var table = document.getElementById("timerListId");
+  function addRowHandlers(tableElId) {
+  var table = document.getElementById(tableElId);
   var rows = table.getElementsByTagName("tr");
   for (i = 0; i < rows.length; i++) {
     var currentRow = table.rows[i];

@@ -104,11 +104,15 @@ async function searchTimers(res, req) {
 }
 
 async function getTimers(res, req) {
-    const result = await query(
-        `SELECT * FROM timer WHERE is_public = true`
+    const timerResult = await query(
+        `SELECT * FROM timer WHERE is_public = true ORDER BY last_visit_time DESC LIMIT 20`
     )
-    let timers = prepareTimerForOutput(result.rows);
-    res.render('timer/home-timer', { timers: timers, user: req.user });
+    const popularTimerResult = await query(
+        `SELECT * FROM timer WHERE is_public = true ORDER BY visit_count DESC LIMIT 5`
+    )
+    let timers = prepareTimerForOutput(timerResult.rows);
+    let popularTimers = prepareTimerForOutput(popularTimerResult.rows);
+    res.render('timer/home-timer', { timers: timers, popularTimers: popularTimers, user: req.user });
     return;
 }
 

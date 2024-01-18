@@ -74,10 +74,19 @@ async function getTimer(res, req) {
             timer.time_elapsed += timeElapsedFromStart;
         }
         res.render('timer/timer', { timer: timer, user: user, ownedTimers: req.session.timers  });
+        incrementTimerCounter(timerCode);
     } else {
         res.sendStatus(404);
     }
     return;
+}
+
+function incrementTimerCounter(timerCode) {
+    console.log('Incrementing counter for timer: ' + timerCode);
+    const result = query(
+        `UPDATE timer SET visit_count = visit_count + 1, last_visit_time = '${new Date().toISOString()}' where timer_code = '${timerCode}'`
+        //  = '${timestamp}'
+    );
 }
 
 async function searchTimers(res, req) { 

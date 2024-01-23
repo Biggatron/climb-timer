@@ -23,6 +23,12 @@ async function main() {
     await query(
       'ALTER TABLE timer ADD COLUMN last_visit_time timestamp default current_timestamp'
     );
+    await query(
+      'ALTER TABLE timer ALTER COLUMN time_elapsed TYPE bigint'
+    );
+    await query(
+      'ALTER TABLE timer ALTER COLUMN time_elapsed SET DEFAULT 0'
+    );
   } catch (e) {
     console.error('Error while adding columns', e.message)
   }

@@ -12,10 +12,10 @@
   margin: 10px;
   height: 100%;
   font-size: 1.2em;
-  color: rgb(130, 130, 130);
+  color: rgb(100, 100, 100);
 }
 .navbar .navbar-group .navbar-item:hover {
-  color: rgb(110, 110, 110);
+  color: rgb(70, 70, 70);
 }
 
 a {
@@ -24,7 +24,7 @@ a {
 }
 
 a:visited {
-  color: rgb(130, 130, 130);
+  color: rgb(100, 100, 100);
 }
 
 li {

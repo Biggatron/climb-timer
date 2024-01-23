@@ -9,13 +9,14 @@ const timerRoutes = require('./routes/timer-routes');
 const passportSetup = require('./config/passport')
 const keys = require('./config/keys');
 const events = require('./events/socket');
+const schedule = require('node-schedule');
 const errorHandler = require('./utilities/errorHandler');
+const {oldTimerCleanup} = require('./utilities/util');
 
 const app = express();
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
-
 
 const port = 3000
 
@@ -68,11 +69,8 @@ app.use('/', timerRoutes);
 
 app.use(errorHandler);
 
-/* app.get('/', (req, res) => {
-  //res.render('home', {user: req.user})
-  // Direct all traffic to timer
-    res.redirect('/timer');
-}); */
+// Job that runs every day at 01:00:00 and deletes old timers without owners
+const job = schedule.scheduleJob('0 1 */1 * *', oldTimerCleanup);
 
 io.on('connection', (socket) => {
   events.joinRoom(socket);
@@ -90,7 +88,7 @@ io.on('connection', (socket) => {
     console.log('user paused timer ' + timer.timer_code);
     events.pauseTimer(socket, io, timer);
   });
-  socket.on('resetTimer', (timer) => {
+  socket.on('resetTimer', (timer) => { 
     events.resetTimer(socket, io, timer);
   });
   socket.on('syncTimer', (timer) => {
@@ -99,5 +97,5 @@ io.on('connection', (socket) => {
 });
 
 server.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`Timer app listening on port ${port}`)
 })

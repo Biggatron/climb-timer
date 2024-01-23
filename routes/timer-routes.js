@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const query = require('../db/db');
-const prepareTimerForOutput = require('../utilities/util');
+const {prepareTimerForOutput} = require('../utilities/util');
 
 const authCheck = (req, res, next) => {
     if(!req.user){
@@ -65,19 +65,22 @@ async function getTimer(res, req) {
         `SELECT * FROM timer WHERE timer_code = '${timerCode}'`
     );
     let timer = result.rows[0];
-
+    if (!timer) {
+        res.sendStatus(404);
+        return;
+    } 
+    
     console.log("Query successfull: ");
     console.log({timer: timer});
-    if ( timer ) {
-        if (!timer.is_paused) {
-            let timeElapsedFromStart = new Date() - timer.start_time;
-            timer.time_elapsed += timeElapsedFromStart;
-        }
-        res.render('timer/timer', { timer: timer, user: user, ownedTimers: req.session.timers  });
-        incrementTimerCounter(timerCode);
-    } else {
-        res.sendStatus(404);
+    timer.time_elapsed = parseInt(timer.time_elapsed); // Bigint returns string
+    if (timer.time_elapsed) {
     }
+    if (!timer.is_paused) {
+        let timeElapsedFromStart = new Date() - timer.start_time;
+        timer.time_elapsed += timeElapsedFromStart;
+    }
+    res.render('timer/timer', { timer: timer, user: user, ownedTimers: req.session.timers  });
+    incrementTimerCounter(timerCode);
     return;
 }
 
@@ -85,7 +88,6 @@ function incrementTimerCounter(timerCode) {
     console.log('Incrementing counter for timer: ' + timerCode);
     const result = query(
         `UPDATE timer SET visit_count = visit_count + 1, last_visit_time = '${new Date().toISOString()}' where timer_code = '${timerCode}'`
-        //  = '${timestamp}'
     );
 }
 
@@ -96,7 +98,6 @@ async function searchTimers(res, req) {
     const result = await query(
         `SELECT * FROM timer WHERE is_public = true AND ( LOWER(timer_code) LIKE LOWER('%${searchString}%') or LOWER(timer_name) LIKE LOWER('%${searchString}%') )`
     );
-    //console.log({timers: result.rows})
     console.log(result.rows.length + " timers queried with searchTimers()")
     let timers = prepareTimerForOutput(result.rows);
     res.send(JSON.stringify(timers));
@@ -110,9 +111,13 @@ async function getTimers(res, req) {
     const popularTimerResult = await query(
         `SELECT * FROM timer WHERE is_public = true ORDER BY visit_count DESC LIMIT 5`
     )
+    const newTimerResult = await query(
+        `SELECT * FROM timer WHERE is_public = true and create_time > now() - interval '1 day' ORDER BY create_time DESC LIMIT 5`
+    )
     let timers = prepareTimerForOutput(timerResult.rows);
     let popularTimers = prepareTimerForOutput(popularTimerResult.rows);
-    res.render('timer/home-timer', { timers: timers, popularTimers: popularTimers, user: req.user });
+    let newTimers = prepareTimerForOutput(newTimerResult.rows);
+    res.render('timer/home-timer', { timers: timers, popularTimers: popularTimers, newTimers: newTimers, user: req.user });
     return;
 }
 

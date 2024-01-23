@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const query = require('../db/db');
-const prepareTimerForOutput = require('../utilities/util');
+const {prepareTimerForOutput} = require('../utilities/util');
 
 
 const authCheck = (req, res, next) => {

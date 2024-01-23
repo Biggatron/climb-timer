@@ -16,7 +16,9 @@
       <div class="space-between-row">
         <div class="timer-find">
             <input id="inputTimerSearchString" type="text" class="input-text">
-            <button class="btn" onClick="searchTimer()">Search</button>
+            <label for="inputTimerSearchString">
+              <button class="btn" onClick="searchTimer()">Search</button>
+            </label>
         </div>
         <div><a href="/create"><button class="btn">New timer</button></a></div>
       </div>
@@ -44,12 +46,38 @@
               <td><%= popularTimers[i].status %></td>
               <td><%= popularTimers[i].round %></td>
             </tr>
-            <%= console.log(popularTimers) %>
         <% } %>
         </tbody>
       </table>
+      <% if (newTimers.length) { %>
+      <table id="newTimerListId" class="">
+        <caption>New timers</caption>
+        <thead>
+          <tr>
+            <th scope="col">Timer name</th>
+            <th scope="col">Code</th>
+            <th scope="col">Round duration</th>
+            <th scope="col">Buffer duration</th>
+            <th scope="col">Status</th>
+            <th scope="col">Round</th>
+          </tr>
+        </thead>
+        <tbody id="newTimerTable">
+          <% for (var i=0; i<newTimers.length; i++) { %>
+            <tr style=" cursor: pointer;">
+              <td><%= newTimers[i].timer_name %></td>
+              <td><%= newTimers[i].timer_code %></td>
+              <td><%= newTimers[i].timerDurationText %></td>
+              <td><%= newTimers[i].bufferDurationText %></td>
+              <td><%= newTimers[i].status %></td>
+              <td><%= newTimers[i].round %></td>
+            </tr>
+        <% } %>
+        </tbody>
+      </table>
+      <% } %>
       <table id="timerListId" class="">
-        <caption>Public timers</caption>
+        <caption>Recently used timers</caption>
         <thead>
           <tr>
             <th scope="col">Timer name</th>
@@ -70,7 +98,6 @@
               <td><%= timers[i].status %></td>
               <td><%= timers[i].round %></td>
             </tr>
-            <%= console.log(timers) %>
         <% } %>
         </tbody>
       </table>
@@ -86,8 +113,17 @@
 </html>
 
 <script>
-  addRowHandlers("timerListId");
-  addRowHandlers("popularTimerListId");
+  initialize();
+
+  function initialize() {
+    addRowHandlers("timerListId");
+    addRowHandlers("popularTimerListId");
+    addRowHandlers("newTimerListId");
+
+    
+    let newTimerListEl = document.getElementById("newTimerListId");
+    let popularTimerListEl = document.getElementById("popularTimerListId");
+  }
 
   function searchTimer() {
     let timerTableEl = document.getElementById("timerTable");

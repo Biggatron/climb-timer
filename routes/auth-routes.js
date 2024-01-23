@@ -74,7 +74,7 @@ async function newLocalUser(req, res) {
     let salt = crypto.randomBytes(16);
     crypto.pbkdf2(user.password, salt, 310000, 32, 'sha256', async function(err, hashedPassword) {
         if (err) { return next(err); }
-        console.log('About to insert new user')
+        console.log('Inserting new user')
         console.log({hashedPassword: hashedPassword})
         const result = await query(
             'INSERT INTO user_account (email, name, hashed_password, salt, create_timestamp) VALUES ($1, $2, $3, $4, $5) RETURNING *',
@@ -89,7 +89,7 @@ async function newLocalUser(req, res) {
                 email: result.rows[0].email,
                 name: result.rows[0].name
             }
-            console.log('About to login')
+            console.log('Logging in user')
             req.login(user, function(err) {
                 if (err) { return next(err); }
                 res.status(200).json(user);

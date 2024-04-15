@@ -51,6 +51,15 @@
 </html>
 
 <script>
+  let loaderEl = document.getElementById("loader");
+
+  function showLoader() {
+    loaderEl.classList.remove('display-none');
+  }
+
+  function hideLoader() {
+    loaderEl.classList.add('display-none');
+  }
 
   function signUp() {
     let email = document.getElementById('email').value;
@@ -63,7 +72,9 @@
       name: name
     }
 
+    showLoader();
     postData('/auth/local/signup', newUser).then(returnData => {
+      hideLoader();
       if (returnData.error) {
         alert('signup failed')
       } else {

@@ -126,10 +126,10 @@
 
     // Timer events
     function increaseTimerMinutes() {
-        increaseMinutes(timer, timerString, timerMinEl)
+        increaseMinutes(timer, timerString, timerMinEl, timerSecEl)
     }  
     function decreaseTimerMinutes() {
-        decreaseMinutes(timer, timerString, timerMinEl)
+        decreaseMinutes(timer, timerString, timerMinEl, timerSecEl)
     }  
     function increaseTimerSeconds() {
         increaseSeconds(timer, timerString, timerMinEl, timerSecEl)
@@ -140,10 +140,10 @@
 
     // Buffer events
     function increaseBufferMinutes() {
-        increaseMinutes(buffer, bufferString, bufferMinEl)
+        increaseMinutes(buffer, bufferString, bufferMinEl, bufferSecEl)
     }  
     function decreaseBufferMinutes() {
-        decreaseMinutes(buffer, bufferString, bufferMinEl)
+        decreaseMinutes(buffer, bufferString, bufferMinEl, bufferSecEl)
     }  
     function increaseBufferSeconds() {
         increaseSeconds(buffer, bufferString, bufferMinEl, bufferSecEl)
@@ -152,25 +152,31 @@
         decreaseSeconds(buffer, bufferString, bufferMinEl, bufferSecEl)
     }
 
-    function increaseMinutes(timeObj,stringObj, el) {
-        if (timeObj.minutes < 99) ++timeObj.minutes;
+    function increaseMinutes(timeObj,stringObj, el, elSec) {
+        if (timeObj.minutes < 60) ++timeObj.minutes;
         updateMinutes(timeObj, stringObj, el);
+        updateSeconds(timeObj, stringObj, elSec);
     }
 
-    function decreaseMinutes(timeObj,stringObj, el) {
+    function decreaseMinutes(timeObj,stringObj, el, elSec) {
         if (timeObj.minutes > 0) --timeObj.minutes;
         updateMinutes(timeObj, stringObj, el);
+        updateSeconds(timeObj, stringObj, elSec);
     }
 
     function increaseSeconds(timeObj,stringObj, elMin, elSec) {
         timeObj.seconds -= timeObj.seconds % secondStep;
         if ((timeObj.seconds + secondStep) === 60) {
-            if (timeObj.minutes < 99 ) {
+            if (timeObj.minutes < 60 ) {
                 ++timeObj.minutes;
                 timeObj.seconds = 0;
             }
         } else {
-            timeObj.seconds += secondStep;
+            if (timeObj.minutes === 60 ) {
+                timeObj.seconds = 0;
+            } else {
+                timeObj.seconds += secondStep;
+            }
         }
         updateMinutes(timeObj, stringObj, elMin);
         updateSeconds(timeObj, stringObj, elSec);
@@ -195,6 +201,7 @@
     }
 
     function updateMinutes(timeObj, stringObj, el) {
+        validateTimerDuration();
         if (timeObj.minutes.toString().length === 1) {
             stringObj.minutes = '0' + timeObj.minutes;
         } else {
@@ -204,6 +211,7 @@
     }
 
     function updateSeconds(timeObj, stringObj, el) {
+        validateTimerDuration();
         if (timeObj.seconds.toString().length === 1) {
             stringObj.seconds = '0' + timeObj.seconds;
         } else {
@@ -246,18 +254,39 @@
                 bufferString.seconds = el.innerText;
                 break;
         }
+        validateTimerDuration();    
+    }
+
+    function validateTimerDuration() {
+        console.log("validateDuration runing")
+        if (timer.minutes >= 60) {
+            timer.minutes = 60;
+            timer.seconds = 0;
+            //updateMinutes(timer, timerString, timerMinEl);
+            //updateSeconds(timer, timerString, timerSecEl);
+        }
+        if (buffer.minutes >= 60) {
+            buffer.minutes = 60;
+            buffer.seconds = 0;
+        }
     }
 
     // Event to handle when user clicks away from editable timer text
     addEventListener("mousedown", (event) => {
         if (!elBeingEditied){ return 0; }; // If no element is being edited then nothing needs to be done
         if (event.target === elBeingEditied) { return 0; }; // If element being edited was clicked then nothing needs to be done
-        if (elBeingEditied.innerText.length === 0) {
+        if(elBeingEditied.innerText.length === 0) {
             elBeingEditied.innerText = "00"; 
         } else if (elBeingEditied.innerText.length === 1) {
             elBeingEditied.innerText = "0" + elBeingEditied.innerText;
         }
         updateTimerObject(elBeingEditied);
+        // Make sure timer/buffer does not excede 60 minutes
+        validateTimerDuration();
+        updateMinutes(timer, timerString, timerMinEl);
+        updateSeconds(timer, timerString, timerSecEl);
+        updateMinutes(buffer, bufferString, bufferMinEl);
+        updateSeconds(buffer, bufferString, bufferSecEl);
         elBeingEditied.contentEditable = false;
         elBeingEditied = null;
     });

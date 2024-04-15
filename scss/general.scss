@@ -145,3 +145,26 @@ hr.solid {
   from {bottom: 30px; opacity: 1;}
   to {bottom: 0; opacity: 0;}
 }
+
+/* Spinning loader */
+.loader {
+  border: 0.5em solid $secondary-background-color; /* Light grey */
+  border-top: 0.5em solid $main-blue; /* Blue */
+  border-radius: 50%;
+  width: 2em;
+  height: 2em;
+  animation: spin 1s linear infinite;
+  position: absolute; /* Sit on top of the screen */
+  z-index: 1; /* Add a z-index if needed */
+  
+  left: 0; 
+  right: 0; 
+  top: 0;
+  bottom: 0;
+  margin: auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

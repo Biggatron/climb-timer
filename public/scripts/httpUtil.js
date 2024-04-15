@@ -41,4 +41,29 @@ async function getData(url = '') {
   }
 }
 
+async function deleteData(url = '') {
+  // Default options are marked with *
+  const response = await fetch(url, {
+    method: 'DELETE', // *GET, POST, PUT, DELETE, etc.
+    mode: 'cors', // no-cors, *cors, same-origin
+    cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+    credentials: 'same-origin', // include, *same-origin, omit
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    redirect: 'follow', // manual, *follow, error
+    referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+  });
+  if (response.redirected) {
+    return response;
+  } else {
+    try {
+      let json = await response.json();
+      return json;
+    } catch (error) {
+      return response;
+    }
+  }
+}
+
 /* Það hlýtur að vera hægt að checka hvort get response-ið sé html, ef svo er þá redirecta á server renderaða síðu.  */

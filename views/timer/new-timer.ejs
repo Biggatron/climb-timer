@@ -78,7 +78,9 @@
   let rotateBackgroundColorEl = document.getElementById("rotateBackgroundColor");
   let mainColorContainerEl = document.getElementById("mainColorContainer");
   let secondaryColorContainerEl = document.getElementById("secondaryColorContainer");
-  let bufferColorInputEl = document.getElementById("bufferColorInput");
+  let bufferColorInputEl = document.getElementById("bufferColorInput");  
+  let loaderEl = document.getElementById("loader");
+
 
   rotateBackgroundColorEl.addEventListener("change", toggleRotateBackgroundColor);
 
@@ -91,6 +93,14 @@
     } else {
       secondaryColorContainerEl.classList.add("display-none");
     }
+  }
+  
+  function showLoader() {
+    loaderEl.classList.remove('display-none');
+  }
+
+  function hideLoader() {
+    loaderEl.classList.add('display-none');
   }
 
   function createNewTimer() {
@@ -129,7 +139,9 @@
       bufferColor: bufferColor
     };
     console.log({timerData});
+    showLoader();
     postData('/create', timerData).then(response => {
+      hideLoader();
       if (response.timer_code) { // bakendi skilar timerData ef insert var successfull
         window.location.href = '/' + response .timer_code;
       } else {

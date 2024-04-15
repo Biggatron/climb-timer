@@ -124,11 +124,21 @@
     let newTimerListEl = document.getElementById("newTimerListId");
     let popularTimerListEl = document.getElementById("popularTimerListId");
   }
+  let loaderEl = document.getElementById("loader");
+  
+  function showLoader() {
+    loaderEl.classList.remove('display-none');
+  }
+
+  function hideLoader() {
+    loaderEl.classList.add('display-none');
+  }
 
   function searchTimer() {
     let timerTableEl = document.getElementById("timerTable");
     let searchString = document.getElementById('inputTimerSearchString').value;
     console.log("Executing timer search with string: " + searchString);
+    showLoader();
     getData('/search?filters[timerName]=' + searchString).then(timers => {
       console.log("Search returned " + timers.length + " timers");
       timerTableEl.innerHTML = "";
@@ -146,6 +156,7 @@
       }
       addRowHandlers("timerListId");
       addRowHandlers("popularTimerListId");
+      hideLoader();
     });
   }
   
@@ -156,12 +167,13 @@
   }
 
   function addRowHandlers(tableElId) {
-  var table = document.getElementById(tableElId);
-  var rows = table.getElementsByTagName("tr");
-  for (i = 0; i < rows.length; i++) {
-    var currentRow = table.rows[i];
-    var createClickHandler = function(row) {
-      return function() {
+    var table = document.getElementById(tableElId);
+    if (!table) { return }; 
+    var rows = table.getElementsByTagName("tr");
+    for (i = 0; i < rows.length; i++) {
+      var currentRow = table.rows[i];
+      var createClickHandler = function(row) {
+        return function() {
         var cell = row.getElementsByTagName("td")[1];
         var code = cell.innerHTML;
         location.href = '/' + code;

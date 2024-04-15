@@ -28,7 +28,6 @@ router.post('/local/signup', (req, res) => {
 
 // Local login
 router.post('/local/login', passport.authenticate('local', { successRedirect: '/profile', failWithError: true }), (err, req, res, next) => {
-    console.log('Is this called?')
     if (err) {
         err.message = 'Incorrect username or password'
         err.status = 401;

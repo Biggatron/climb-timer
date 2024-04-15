@@ -30,6 +30,11 @@ router.get('/*', (req, res) => {
     getTimer(res, req);
 });
 
+router.delete('/*', (req, res) => {
+    console.log('delete route hit')
+    deleteTimer(res, req);
+});
+
 async function createTimer(req, res) {
     let timer = req.body;
     timer.createTime = new Date();
@@ -119,6 +124,47 @@ async function getTimers(res, req) {
     let newTimers = prepareTimerForOutput(newTimerResult.rows);
     res.render('timer/home-timer', { timers: timers, popularTimers: popularTimers, newTimers: newTimers, user: req.user });
     return;
+}
+
+async function deleteTimer(res, req) {
+    let timerCode = req.params[0];
+    let user = req.user;
+    
+    const getTimerResult = await query(
+        `SELECT * FROM timer WHERE timer_code = '${timerCode}'`
+    );
+    let timer = getTimerResult.rows[0];
+    if (!timer) {
+        res.status(404).json({error: `Timer ${timerCode} does not exist`})
+        return;
+    }
+    if (!user) {
+        res.status(404).json({error: `User has to be logged on to delete timer`})
+        return;
+    }
+    if (timer.user_id === user.id) {
+        // Delete timer
+        const deleteTimerResult = await query(
+            `DELETE FROM timer WHERE timer_code = '${timerCode}'`
+        );
+        console.log({
+            deleteTimerResult: deleteTimerResult
+        })
+        const getDeleteTimerResult = await query(
+            `SELECT * FROM timer WHERE timer_code = '${timerCode}'`
+        );
+        let timer = getDeleteTimerResult.rows[0];
+        if (timer) {
+            res.sendStatus(404).json({error: `Failed to delete timer ${timerCode}`})
+            return;
+        } else {
+            res.sendStatus(200);
+            return;
+        }
+    } else {
+        res.status(404).json({error: 'userID does not match timer.userID'})
+        console.log(`user ${user.id} tried to delete timer owned by ${timer.user_id}`)
+    }
 }
 
 async function getNewTimerCode() {

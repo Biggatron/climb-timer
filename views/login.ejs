@@ -41,6 +41,16 @@
 </body>
 </html>
 <script>
+  
+  let loaderEl = document.getElementById("loader");
+
+  function showLoader() {
+    loaderEl.classList.remove('display-none');
+  }
+
+  function hideLoader() {
+    loaderEl.classList.add('display-none');
+  }
 
   function login() {
     let email = document.getElementById('email').value;
@@ -51,7 +61,9 @@
       password: password
     }
 
+    showLoader();
     postData('/auth/local/login', user).then(response => {
+      hideLoader();
       if (response.status === 401) {
         alert(response.message);
       }

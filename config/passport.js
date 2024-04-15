@@ -94,8 +94,14 @@ passport.use(new LocalStrategy({
     let row = result.rows[0];
     let user = {
       id : result.rows[0].id,
+      googleId : result.rows[0].google_id,
       name : result.rows[0].name,
       email : result.rows[0].email,
+    };
+
+    // If googleId is present then there's no password to validate and user must login using google
+    if (user.googleId) {
+      return done(null, false, { message: 'Email is associated with a google account' });
     };
 
     // Validate password

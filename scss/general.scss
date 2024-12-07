@@ -1,5 +1,5 @@
-@import "__variables";
-@import "__buttons";
+@use "variables";
+@use "buttons";
 
 /* Core css, HTML, Body*/
 .body-container {
@@ -29,11 +29,17 @@
 }
 
 .content-container {
-  background-color: $main-background-color;
+  background-color: variables.$main-background-color;
   margin-bottom: 2rem;
   padding: 2rem 2rem;
   border-radius: 0.3rem;
   height: auto;
+}
+
+@media (max-width: 500px) {
+  .content-container {
+    padding: 0.5rem;
+  }
 }
 
 
@@ -86,7 +92,7 @@ flex-direction: row;
 }
 
 hr.solid {
-  border-top: 1px solid $main-dark-gray;
+  border-top: 1px solid variables.$main-dark-gray;
 }
 
 .vertical-shrink-center-container {
@@ -105,7 +111,7 @@ hr.solid {
   visibility: hidden; /* Hidden by default. Visible on click */
   min-width: 250px; /* Set a default minimum width */
   margin-left: -125px; /* Divide value of min-width by 2 */
-  background-color: $main-blue;
+  background-color: variables.$main-blue;
   color: #fff; /* White text color */
   text-align: center; /* Centered text */
   border-radius: 5px; /* Rounded borders */
@@ -148,11 +154,11 @@ hr.solid {
 
 /* Spinning loader */
 .loader {
-  border: 0.5em solid $secondary-background-color; /* Light grey */
-  border-top: 0.5em solid $main-blue; /* Blue */
+  border: 0.5rem solid variables.$secondary-background-color; /* Light grey */
+  border-top: 0.5rem solid variables.$main-blue; /* Blue */
   border-radius: 50%;
-  width: 2em;
-  height: 2em;
+  width: 2rem;
+  height: 2rem;
   animation: spin 1s linear infinite;
   position: absolute; /* Sit on top of the screen */
   z-index: 1; /* Add a z-index if needed */

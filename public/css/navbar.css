@@ -11,7 +11,7 @@
 .navbar .navbar-group .navbar-item {
   margin: 10px;
   height: 100%;
-  font-size: 1.2em;
+  font-size: 1.2rem;
   color: rgb(100, 100, 100);
 }
 .navbar .navbar-group .navbar-item:hover {

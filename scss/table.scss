@@ -1,4 +1,4 @@
-@import "__variables";
+@use "variables";
 
 table {
   border-collapse: collapse;
@@ -7,8 +7,14 @@ table {
 	vertical-align: middle;
 }
 
+@media (max-width: 700px) {
+  .hide-on-mobile {
+    display: none;
+  }
+}
+
 thead {
-  background-color: $light-black;
+  background-color: variables.$light-black;
   color: white;
 }
 
@@ -21,7 +27,7 @@ th, td {
 caption {
 	font-weight: bold;
 	font-size: 24px;
-	color: $light-black;
+	color: variables.$light-black;
 	margin: 12px;
 }
 

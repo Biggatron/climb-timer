@@ -26,7 +26,7 @@
                 </button>
                 <button title="Show Round on fullscreen" id="toggleRoundsOnFullscreen" class="dropdown-button" onClick="toggleFullscreenRound()">  
                   <span class="btn-icon timer-button-fullscreen-round dropdown-icon"></span>
-                  <p id="toggleFullscreenRoundText">Hide Round on fullscreen</p>
+                  <p id="toggleFullscreenRoundText">Show Round on fullscreen</p>
                 </button>
                 <button title="Sync connected timers" id="syncTimersButton" class="dropdown-button" onClick="syncToConnectedTimers()">  
                   <span class="btn-icon timer-button-sync dropdown-icon"></span>
@@ -108,7 +108,7 @@
   let isNoSleepActive = false;
 
   var soundOn = false;
-  var showFullscreenRound = true;
+  var showFullscreenRound = false;
   var millisecondsOn = false;
   var shortBeep = document.getElementById("shortBeep");
   var longBeep = document.getElementById("longBeep");
@@ -675,5 +675,17 @@ window.onclick = function(event) {
       toggleSound();
     }
   })
+
+  screen.orientation.addEventListener("change", (event) => {
+    const type = event.target.type;
+    const angle = event.target.angle;
+    console.log(`ScreenOrientation change: ${type}, ${angle} degrees. `);
+    if (!iOS()) { return; }
+    if (type === 'landscape-primary') {
+      timerContainerEl.classList.add('iphone-fullscreen');
+    } else {
+      timerContainerEl.classList.remove('iphone-fullscreen');
+    }
+  });
 
 </script>

@@ -1,4 +1,4 @@
-@import "__variables";
+@use "variables";
 
 @font-face {
   font-family: 'Roboto';
@@ -7,6 +7,7 @@
 
 html {
   font-family: Roboto, Verdana, sans-serif;
+  font-size: 16px;
   height: 100%;
 }
 

@@ -1,5 +1,5 @@
-@import "__googleButton";
-@import "__variables";
+@use "variables";
+@use "googleButton";
 
 .btn {
   background-color: rgb(237, 237, 237);
@@ -135,11 +135,11 @@
 }
 
 input:checked + .slider {
-  background-color: $main-blue;
+  background-color: variables.$main-blue;
 }
 
 input:focus + .slider {
-  box-shadow: 0 0 1px $main-blue;
+  box-shadow: 0 0 1px variables.$main-blue;
 }
 
 input:checked + .slider:before {
@@ -161,7 +161,7 @@ input:checked + .slider:before {
   background: none;
   width: 100%;
   text-align: left;
-  background-color: $secondary-background-color;
+  background-color: variables.$secondary-background-color;
   font-weight: bold;
   font-size: 1.2em;
   text-wrap: nowrap;
@@ -184,7 +184,7 @@ input:checked + .slider:before {
   position: absolute;
   border-radius: 10px;
   overflow: hidden;
-  background-color: $secondary-background-color;
+  background-color: variables.$secondary-background-color;
   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
   z-index: 1;
 }

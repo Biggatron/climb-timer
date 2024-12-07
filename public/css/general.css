@@ -159,6 +159,7 @@
   bottom: 0;
   border-radius: 34px;
   background-color: #ccc;
+  -webkit-transition: 0.4s;
   transition: 0.4s;
 }
 
@@ -171,6 +172,7 @@
   bottom: 3px;
   border-radius: 50%;
   background-color: white;
+  -webkit-transition: 0.4s;
   transition: 0.4s;
 }
 
@@ -183,6 +185,8 @@ input:focus + .slider {
 }
 
 input:checked + .slider:before {
+  -webkit-transform: translateX(16px);
+  -ms-transform: translateX(16px);
   transform: translateX(16px);
 }
 
@@ -271,6 +275,11 @@ input:checked + .slider:before {
   height: auto;
 }
 
+@media (max-width: 500px) {
+  .content-container {
+    padding: 0.5rem;
+  }
+}
 .center-row-container {
   display: flex;
   justify-content: center;
@@ -355,10 +364,21 @@ hr.solid {
   visibility: visible; /* Show the snackbar */
   /* Add animation: Take 0.5 seconds to fade in and out the snackbar.
   However, delay the fade out process for 2.5 seconds */
+  -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
   animation: fadein 0.5s, fadeout 0.5s 2.5s;
 }
 
 /* Animations to fade the snackbar in and out */
+@-webkit-keyframes fadein {
+  from {
+    bottom: 0;
+    opacity: 0;
+  }
+  to {
+    bottom: 30px;
+    opacity: 1;
+  }
+}
 @keyframes fadein {
   from {
     bottom: 0;
@@ -367,6 +387,16 @@ hr.solid {
   to {
     bottom: 30px;
     opacity: 1;
+  }
+}
+@-webkit-keyframes fadeout {
+  from {
+    bottom: 30px;
+    opacity: 1;
+  }
+  to {
+    bottom: 0;
+    opacity: 0;
   }
 }
 @keyframes fadeout {
@@ -381,11 +411,11 @@ hr.solid {
 }
 /* Spinning loader */
 .loader {
-  border: 0.5em solid rgb(245, 245, 245); /* Light grey */
-  border-top: 0.5em solid rgb(33, 150, 243); /* Blue */
+  border: 0.5rem solid rgb(245, 245, 245); /* Light grey */
+  border-top: 0.5rem solid rgb(33, 150, 243); /* Blue */
   border-radius: 50%;
-  width: 2em;
-  height: 2em;
+  width: 2rem;
+  height: 2rem;
   animation: spin 1s linear infinite;
   position: absolute; /* Sit on top of the screen */
   z-index: 1; /* Add a z-index if needed */

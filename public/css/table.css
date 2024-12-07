@@ -5,6 +5,11 @@ table {
   vertical-align: middle;
 }
 
+@media (max-width: 700px) {
+  .hide-on-mobile {
+    display: none;
+  }
+}
 thead {
   background-color: rgb(50, 50, 50);
   color: white;

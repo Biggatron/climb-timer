@@ -83,7 +83,7 @@
 </html>
 
 <script>
-  let timer, user, ownedTimers, fullscreen; // ownedTimers list timers owned be logged out user
+  let timer, user, ownedTimers, initialFullscreen; // ownedTimers list timers owned be logged out user
   user = '<%- JSON.stringify(user) %>';
   if (user) {
     user = JSON.parse(user);
@@ -181,7 +181,7 @@
       forwardTimerButton.remove();
       rewindTimerButton.remove();
     }
-    if (user.id !== timer.user_id) {
+    if (user.id !== timer.user_id && user.id !== 2) { // User 2 is admin
       let deleteTimerButtonEl = document.getElementById("deleteTimerButton");
       deleteTimerButtonEl.remove();
     }

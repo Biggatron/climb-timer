@@ -8,7 +8,7 @@ async function main() {
 
   // Add columns
   try {
-    await query(
+    /* await query(
       'ALTER TABLE timer ADD COLUMN main_color char(7)'
     );
     await query(
@@ -28,6 +28,9 @@ async function main() {
     );
     await query(
       'ALTER TABLE timer ALTER COLUMN time_elapsed SET DEFAULT 0'
+    ); */
+    await query(
+      'ALTER TABLE timer ADD COLUMN single_countdown boolean default false'
     );
   } catch (e) {
     console.error('Error while adding columns', e.message)

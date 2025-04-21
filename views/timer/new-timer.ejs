@@ -23,20 +23,35 @@
         <div class="center-row-container vertical-margin">
           <%- include('../partials/timer-input'); %>
         </div>
-        <div class="switch-container">
-          <p>Public</p> 
-          <label class="switch">
-            <input id="isPublic" type="checkbox" checked>
-            <span class="slider"></span>
-          </label>
-        </div>  
-        <hr class="solid">
-        <div class="switch-container">
-          <p>Rotate timer color</p> 
-          <label class="switch">
-            <input id="rotateBackgroundColor" type="checkbox" checked>
-            <span class="slider"></span>
-          </label>
+        <div>
+          <div class="switch-container">
+            <p>Public</p> 
+            <label class="switch">
+              <input id="isPublic" type="checkbox" checked>
+              <span class="slider"></span>
+            </label>
+          </div>  
+          <hr class="solid">
+        </div>
+        <div>
+          <div class="switch-container">
+            <p>Single countdown</p> 
+            <label class="switch">
+              <input id="singleCountdown" type="checkbox">
+              <span class="slider"></span>
+            </label>
+          </div>  
+          <hr class="solid">
+        </div>
+        <div id="rotateBackgroundColorContainer">
+          <div class="switch-container">
+            <p>Rotate timer color</p> 
+            <label class="switch">
+              <input id="rotateBackgroundColor" type="checkbox" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+          <hr class="solid">
         </div>
         <div class="switch-container" id="mainColorContainer">
           <p>Main color</p> 
@@ -46,7 +61,7 @@
           <p>Secondary color</p> 
           <input id="secondaryColorInput" type="color" value="#93b5ff">
         </div>  
-        <div class="switch-container">
+        <div class="switch-container" id="bufferColorContainer">
           <p>Buffer color</p> 
           <input id="bufferColorInput" type="color" value="#fffb80">
         </div>  
@@ -76,22 +91,40 @@
   console.log(user);
 
   let rotateBackgroundColorEl = document.getElementById("rotateBackgroundColor");
+  let rotateBackgroundColorContainerEl = document.getElementById("rotateBackgroundColorContainer");
+  let singleCountdownEl = document.getElementById("singleCountdown");
   let mainColorContainerEl = document.getElementById("mainColorContainer");
   let secondaryColorContainerEl = document.getElementById("secondaryColorContainer");
+  let bufferColorContainerEl = document.getElementById("bufferColorContainer");
   let bufferColorInputEl = document.getElementById("bufferColorInput");  
   let loaderEl = document.getElementById("loader");
 
 
   rotateBackgroundColorEl.addEventListener("change", toggleRotateBackgroundColor);
+  singleCountdownEl.addEventListener("change", toggleSingleCountdown);
 
   // Initialization
   toggleRotateBackgroundColor();
+  toggleSingleCountdown();
 
   function toggleRotateBackgroundColor() {
     if (rotateBackgroundColorEl.checked) {
       secondaryColorContainerEl.classList.remove("display-none");
     } else {
       secondaryColorContainerEl.classList.add("display-none");
+    }
+  }
+
+  function toggleSingleCountdown() {
+    if (singleCountdownEl.checked) {
+      secondaryColorContainerEl.classList.add("display-none");
+      bufferColorContainerEl.classList.add("display-none");
+      rotateBackgroundColorContainerEl.classList.add("display-none");
+      rotateBackgroundColorEl.checked = false;
+    } else {
+      secondaryColorContainerEl.classList.remove("display-none");
+      bufferColorContainerEl.classList.remove("display-none");
+      rotateBackgroundColorContainerEl.classList.remove("display-none");
     }
   }
   
@@ -107,6 +140,7 @@
     let timer = parseInt(document.getElementById('timerMin').innerText) * 60 + parseInt(document.getElementById('timerSec').innerText);
     let buffer = parseInt(document.getElementById('bufferMin').innerText) * 60 + parseInt(document.getElementById('bufferSec').innerText);
     let rotateBackgroundColor = document.getElementById('rotateBackgroundColor').checked;
+    let singleCountdown = document.getElementById('singleCountdown').checked;
     let isPublic = document.getElementById('isPublic').checked;
     let timerName = document.getElementById('timerNameInput').value;
     
@@ -134,6 +168,7 @@
       buffer: buffer,
       isPublic: isPublic,
       rotateBackgroundColor: rotateBackgroundColor,
+      singleCountdown: singleCountdown,
       mainColor: mainColor,
       secondaryColor: secondaryColor,
       bufferColor: bufferColor

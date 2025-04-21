@@ -90,6 +90,17 @@
   margin-bottom: auto;
 }
 
+.timer-container-fullscreen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
 .timer-controls-container {
   width: 100%;
   margin-top: 10px;

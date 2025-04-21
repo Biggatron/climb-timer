@@ -62,7 +62,9 @@
           <div class="space-between-row timer-controls-container">
             <button title="Sound On/off" id="toggleSoundButton" class="btn btn-icon timer-button-unmute" onClick="toggleSound()"></button>
             <div class="center-row-container" id="timerOwnerButtons"> 
+              <button title="Rewind" id="rewindTimerButton" class="btn btn-icon timer-button-rewind" onClick="rewindTimer()"></button>
               <button title="Play/Pause" id="toggleTimerButton" class="btn btn-icon timer-button-play" onClick="toggleTimer()"></button>
+              <button title="Forward" id="forwardTimerButton" class="btn btn-icon timer-button-forward" onClick="forwardTimer()"></button>
             </div>
             <button title="Toggle Fullscreen" id="toggleTimerFullscreen" class="btn btn-icon timer-button-fullscreen" onClick="toggleFullscreen()"></button>
           </div>
@@ -76,13 +78,12 @@
   </footer>
   <script src="/scripts/socket.io.js"></script>
   <script src="/scripts/noSleep.js"></script>
-  <audio preload="auto" id="shortBeep" src="/media/shortBeep.wav"></audio>
-  <audio preload="auto" id="longBeep" src="/media/longBeep.wav"></audio>
+  <script src="/scripts/sound.js"></script>
 </body>
 </html>
 
 <script>
-  let timer, user, ownedTimers; // ownedTimers list timers owned be logged out user
+  let timer, user, ownedTimers, fullscreen; // ownedTimers list timers owned be logged out user
   user = '<%- JSON.stringify(user) %>';
   if (user) {
     user = JSON.parse(user);
@@ -90,11 +91,15 @@
 
   timer = `<%- JSON.stringify(timer) %>`;
   timer = JSON.parse(timer);
+  console.log({timer: timer})
 
   ownedTimers = '<%- JSON.stringify(ownedTimers) %>';
   if (ownedTimers) {
     ownedTimers = JSON.parse(ownedTimers);
   }
+
+  initialFullscreen = `<%- JSON.stringify(fullscreen) %>`;
+  initialFullscreen = JSON.parse(initialFullscreen);
 
   let socket = io({
     query: {
@@ -118,7 +123,7 @@
   timerContainerEl.addEventListener("fullscreenchange", enableNoSleep);
 
   // Add 1000 to make up for starting timer at 4:00 and holding it for 1 sec
-  if (timer.timer_buffer) {
+  if (timer.timer_buffer || timer.single_countdown) {
     timer.timer_buffer += 1;
   }
   var roundTime = timer.timer_duration * 1000 + timer.timer_buffer * 1000; 
@@ -134,6 +139,8 @@
   let timerRoundEl = document.getElementById('timerRound');
 
   let toggleTimerButton = document.getElementById('toggleTimerButton');
+  let rewindButton = document.getElementById('rewindTimerButton');
+  let forwardButton = document.getElementById('forwardTimerButton');
   let toggleSoundButton = document.getElementById('toggleSoundButton');
   let fullscreenTimerRoundEl = document.getElementById("fullscreenTimerRound");
   let loaderEl = document.getElementById("loader");
@@ -152,17 +159,27 @@
   if (!timer.is_paused) { 
     startTimer();
   };
+  if (initialFullscreen) {
+    let bodyEl = document.getElementsByTagName('body')[0];
+    bodyEl.classList.remove('body-container');
+    bodyEl.classList.add('body-container-fullscreen');
+    bodyEl.innerHTML = '';
+    timerContainerEl.classList.remove('timer-container');
+    timerContainerEl.classList.add('timer-container-fullscreen');
+    bodyEl.appendChild(timerContainerEl);
+  }
 
   function setTimerOwnerButtons() {
     // If userID does not match timer userID and timer does not belong to clients temp timers
     // then control buttons are removed
     if (user.id !== timer.user_id && !ownedTimers.includes(timer.timer_code)) {
-      let toggleTimerButtonEl = document.getElementById("toggleTimerButton");
-      toggleTimerButtonEl.remove();
       let syncTimerButtonEl = document.getElementById("syncTimersButton");
       syncTimerButtonEl.remove();
       let resetTimerButtonEl = document.getElementById("resetTimerButton");
+      toggleTimerButton.remove();
       resetTimerButtonEl.remove();
+      forwardTimerButton.remove();
+      rewindTimerButton.remove();
     }
     if (user.id !== timer.user_id) {
       let deleteTimerButtonEl = document.getElementById("deleteTimerButton");
@@ -177,25 +194,30 @@
     }
 
     if (!timer.bufferActive && timer.timerMin === 0 && timer.timerSec === 0) {
-    //if ( (prevTimer.timerSec === 0 && prevTimer.timerMin === 0 && timer.timerSec !== 0 ) || (prevTimer.bufferSec !== timer.bufferSec && timer.bufferSec ===(timer.bufferSecOrig - 1)) ) {
-      longBeep.play();
+      playLongBeep();
     } else if (timer.bufferActive) {
       if (timer.bufferMin === 0 && timer.bufferSec === 0 ) {
-        longBeep.play(); // timer starts at initial-1 so sound is played when buffer reaches zero
+        playLongBeep(); // timer starts at initial-1 so sound is played when buffer reaches zero
       } else if (timer.bufferMin !== 0) {
         return;
       } else if (timer.bufferSec <= 5 ) {
-        shortBeep.play();
+        playShortBeep();
       }
       return;
     } else if (timer.timerMin === timer.timerMinOrig && timer.timerSec === timer.timerSecOrig) {
-      longBeep.play(); // When initial and start timer is pressed
+      if (timer.is_paused) {
+        playLongBeep(); // When initial and start timer is pressed
+      }
+    } else if (timer.timerMin === 1 && timer.timerSec === 2) {
+      warmUpBeep();
     } else if (timer.timerMin === 1 && timer.timerSec === 0) {
-      shortBeep.play();
+      playShortBeep();
     } else if (timer.timerMin !== 0) {
       return;
+    } else if (timer.timerSec === 7) {
+      warmUpBeep();
     } else if (timer.timerSec <= 5 ) {
-      shortBeep.play();
+      playShortBeep();
     }
   };
 
@@ -281,7 +303,7 @@ function initializeTimer() {
     timerRemaining = Math.floor( timerRemaining / 1000);
     bufferRemaining = Math.floor( bufferRemaining / 1000);
     timer.timerMin = Math.floor(timerRemaining / 60);
-    timer.timerSec = timerRemaining % 60;
+    timer.timerSec = ( timerRemaining + 1 ) % 60; // Timer on refresh was one second ahead of time
     timer.bufferMin = Math.floor(bufferRemaining / 60);
     timer.bufferSec = bufferRemaining % 60;
     timer.timerMil = 1000 - (timer.time_elapsed % 1000);
@@ -354,6 +376,59 @@ function initializeTimer() {
     }
   }
 
+function rewindTimer() {
+  let isTimerPausedOld = timer.is_paused;
+  let roundTime = timer.timer_duration + timer.timer_buffer;
+
+  // If timer is running then pause, rewind and start the timer again.
+  if (!isTimerPausedOld) {
+    pauseTimerClick();
+  }
+
+  timer.time_elapsed = (timer.round - 1) * roundTime * 1000;
+  updateTimerValues(roundTime); // Parameter timeLeftOfRound
+  updateTimerEl();
+
+  // If timer was paused then sync timers. That will update connected timers and the database.
+  if (isTimerPausedOld) {
+    syncToConnectedTimers();
+  } else {
+    startTimerClick();
+  }
+}
+
+function forwardTimer() {
+  let isTimerPausedOld = timer.is_paused;
+  let roundTime = timer.timer_duration + timer.timer_buffer;
+  let timeLeftOfRound = timer.timer_buffer - 1;
+
+  // If timer is running then pause, forward and start the timer again.
+  if (!isTimerPausedOld) {
+    pauseTimerClick();
+  }
+
+  timer.time_elapsed = (timer.round) * roundTime * 1000;
+
+  if (timer.single_countdown) {
+    timer.round += 1;
+    timeLeftOfRound = timer.timer_duration + 1;  
+  } else {
+    // Buffer has an extra second if present. 
+    if (timer.timer_buffer !== 0) {
+      timer.time_elapsed -= timeLeftOfRound * 1000.
+    }
+  }
+  updateTimerValues(timeLeftOfRound);
+  updateTimerEl();
+
+  // If timer was paused then sync timers. That will update connected timers and the database.
+  if (isTimerPausedOld) {
+    syncToConnectedTimers();
+  } else {
+    startTimerClick();
+  }
+}
+
   function toggleTimer() {
     // timerInterval indicates whether timer is active or not
     if (timerInterval) {
@@ -395,38 +470,6 @@ function initializeTimer() {
     timerStep();
     timerInterval = setInterval(timerStep, 20);
 
-/*     // If time has passed then we need to start the interval at the next whole second.
-    // For example if time elapsed is 15200ms then we'll wait for 800ms to start the 
-    // interval that will then update the timer every whole second. 
-    if (timer.time_elapsed) {
-      intervalDelay = 1000 - ( timer.time_elapsed % 1000 ); 
-
-      // If provided network delay is larger than the intervalDelay then that means
-      // that the delay pushed the timer passed the current second.
-      if (delay > intervalDelay) {
-        console.log('Timer should be a second behind master, but it isnt?')
-      } 
-
-      // If time_elapsed is equal to the delay then timer is being started from initial and 
-      // then 04:00 needs to immediately change to 03:59 and start counting from there. 
-      if (timer.time_elapsed === delay) {
-        timerStep();
-      } 
-
-      setTimeout( () => {
-        // If timer was synced while timeout was active then this should be aborted
-        if (timerInterval) return;
-        timerStep();
-        timerInterval = setInterval(timerStep, 20);
-      }, intervalDelay); 
-    // If time elapsed 
-    } else {
-      // Else timer is being started for the first time and then 04:00 needs to immediately
-      // change to 03:59 and start counting from there. 
-      timerStep();
-      timerInterval = setInterval(timerStep, 20);
-    } */
-
     // Uppfæra play/pause takka
     if (user.id === timer.user_id || ownedTimers.includes(timer.timer_code)) {
       toggleTimerButton.classList.add('timer-button-pause');
@@ -439,6 +482,7 @@ function initializeTimer() {
     prevTimer.timerMin = timer.timerMin; 
     prevTimer.timerSec = timer.timerSec; 
     prevTimer.bufferSec = timer.bufferSec;
+    prevTimer.round = timer.round;
 
     let timeElapsedMil = new Date() - startTimeStamp + timer.time_elapsed;
     let timeElapsedsec = Math.floor(timeElapsedMil / 1000);
@@ -458,6 +502,27 @@ function initializeTimer() {
     updateTimerEl();
     if (prevTimer.timerSec !== timer.timerSec || prevTimer.bufferSec !== timer.bufferSec) {
       playSound();
+    }
+    // If timer is single countdown then pause on new round
+    if (timer.single_countdown && timer.round !== prevTimer.round) {
+      pauseTimer();
+      pauseTimeStamp = new Date();
+      let timeDiff = pauseTimeStamp - startTimeStamp;
+      timer.time_elapsed = timer.time_elapsed + timeDiff;
+      return;
+    }
+  }
+
+  function updateTimerValues(timeLeftOfRound) {
+    if (timeLeftOfRound > (timer.timer_buffer - 1)) {
+      let timerRemaining = timeLeftOfRound - timer.timer_buffer;
+      timer.timerMin = Math.floor(timerRemaining / 60);
+      timer.timerSec = timerRemaining % 60;
+      timer.bufferActive = false;
+    } else {
+      timer.bufferMin = Math.floor( (timeLeftOfRound - 1) / 60);
+      timer.bufferSec = (timeLeftOfRound - 1) % 60;
+      timer.bufferActive = true;
     }
   }
 

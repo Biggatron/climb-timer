@@ -20,6 +20,7 @@ CREATE TABLE timer (
     is_paused boolean default true,
     is_public boolean default true,
     rotating_background_color boolean default false,
+    single_countdown boolean default false,
     main_color char(7),
     secondary_color char(7),
     buffer_color char(7),

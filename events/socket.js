@@ -49,7 +49,14 @@ module.exports = {
 
     syncTimer: function (socket, io, timer) {
         console.log('Sync event sent to clients')
+        console.log(timer);
         socket.broadcast.to(socket.handshake.query.timerCode).emit('syncTimer', timer);
+        updateTimer({
+            code: timer.timer_code,
+            startTime: timer.start_time,
+            isPaused: timer.is_paused,
+            time_elapsed: timer.time_elapsed
+        })
     },
 
     // Emits a sync event to all listners of the timer. 

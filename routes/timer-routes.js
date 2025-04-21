@@ -149,7 +149,7 @@ async function deleteTimer(res, req) {
         res.status(404).json({error: `User has to be logged on to delete timer`})
         return;
     }
-    if (timer.user_id === user.id || user.id !== 2) { // User with id 2 is admin
+    if (timer.user_id === user.id || user.id === 2) { // User with id 2 is admin
         // Delete timer
         const deleteTimerResult = await query(
             `DELETE FROM timer WHERE timer_code = '${timerCode}'`

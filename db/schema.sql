@@ -5,6 +5,7 @@ CREATE TABLE user_account (
     name varchar(64),
     hashed_password bytea,
     salt bytea,
+    is_admin boolean default false,
     create_timestamp timestamp,
     modify_timestamp timestamp
 );

@@ -28,9 +28,12 @@ async function main() {
     );
     await query(
       'ALTER TABLE timer ALTER COLUMN time_elapsed SET DEFAULT 0'
-    ); */
+    );*/ 
     await query(
-      'ALTER TABLE timer ADD COLUMN single_countdown boolean default false'
+      'ALTER TABLE user_account ADD COLUMN is_admin boolean default false'
+    );
+    await query(
+      "UPDATE user_account SET is_admin = true WHERE email = 'birgir.snorrason@gmail.com'"
     );
   } catch (e) {
     console.error('Error while adding columns', e.message)

@@ -86,7 +86,8 @@ async function newLocalUser(req, res) {
             let user = {
                 id: result.rows[0].id,
                 email: result.rows[0].email,
-                name: result.rows[0].name
+                name: result.rows[0].name,
+                is_admin: result.rows[0].is_admin
             }
             console.log('Logging in user')
             req.login(user, function(err) {

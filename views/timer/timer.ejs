@@ -28,6 +28,7 @@
                   <span class="btn-icon timer-button-fullscreen-round dropdown-icon"></span>
                   <p id="toggleFullscreenRoundText">Show Round on fullscreen</p>
                 </button>
+                <% if (user && user.isOwner) { %> 
                 <button title="Sync connected timers" id="syncTimersButton" class="dropdown-button" onClick="syncToConnectedTimers()">  
                   <span class="btn-icon timer-button-sync dropdown-icon"></span>
                   <p>Sync connected timers</p>
@@ -36,35 +37,40 @@
                   <span class="btn-icon timer-button-reset dropdown-icon"></span>
                   <p>Reset timer</p>
                 </button>
+                <% } %>
+                <% if (user && ( user.isOwner || user.is_admin )) { %> 
                 <button title="Delete timer" id="deleteTimerButton" class="dropdown-button" onClick="deleteTimer()">  
                   <span class="btn-icon timer-button-delete dropdown-icon"></span>
                   <p>Delete timer</p>
                 </button>
+                <% } %>
               </div>
             </div>
             <div style="text-align: center;">
               <h5 class="timer-name"><%= timer.timer_name %></h5>
-              <h1 class="timer-round" id="timerRound">Round 1</h1>
+              <h1 class="timer-round" id="timerRound"><%= 'Round ' + timer.round %></h1>
             </div>
             <div style="width: 3em;"></div>
           </div>
-          <div class="timer-container" id="timer-container">
-            <h1 class="display-none" id="fullscreenTimerRound">Round 1</h1>
+          <div class="timer-container" id="timer-container" style="background-color: <%= timer.backgroundColor %>">
+            <h1 class="display-none" id="fullscreenTimerRound"><%= 'Round ' + timer.round %></h1>
             <div class="timer-text-container">
               <div class="vertical-shrink-center-container" id="timer-text-container">
-                <div class="timer-text" id="timerMin"></div>
-                <div class="timer-text">:</div>
-                <div class="timer-text" id="timerSec"></div>
-                <div class="timer-text timer-text-ms display-none" id="timerMil"></div>
+                <div class="timer-text" style="color: <%= timer.textColor %>" id="timerMin"><%= timer.bufferActive ? timer.bufferMin.toString().padStart(2, 0) : timer.timerMin.toString().padStart(2, 0) %></div>
+                <div class="timer-text" style="color: <%= timer.textColor %>">:</div>
+                <div class="timer-text" style="color: <%= timer.textColor %>" id="timerSec"><%= timer.bufferActive ? timer.bufferSec.toString().padStart(2, 0) : timer.timerSec.toString().padStart(2, 0) %></div>
+                <div class="timer-text timer-text-ms display-none" style="color: <%= timer.textColor %>" id="timerMil"></div>
               </div>
             </div>
           </div>
           <div class="space-between-row timer-controls-container">
             <button title="Sound On/off" id="toggleSoundButton" class="btn btn-icon timer-button-unmute" onClick="toggleSound()"></button>
-            <div class="center-row-container" id="timerOwnerButtons"> 
-              <button title="Rewind" id="rewindTimerButton" class="btn btn-icon timer-button-rewind" onClick="rewindTimer()"></button>
-              <button title="Play/Pause" id="toggleTimerButton" class="btn btn-icon timer-button-play" onClick="toggleTimer()"></button>
-              <button title="Forward" id="forwardTimerButton" class="btn btn-icon timer-button-forward" onClick="forwardTimer()"></button>
+            <div class="center-row-container" id="timerOwnerButtons">
+              <% if (user && user.isOwner) { %> 
+                <button title="Rewind" id="rewindTimerButton" class="btn btn-icon timer-button-rewind" onClick="rewindTimer()"></button>
+                <button title="Play/Pause" id="toggleTimerButton" class="btn btn-icon <%= timer.is_paused ? 'timer-button-play' : 'timer-button-pause' %>" onClick="toggleTimer()"></button>
+                <button title="Forward" id="forwardTimerButton" class="btn btn-icon timer-button-forward" onClick="forwardTimer()"></button>
+              <% } %>
             </div>
             <button title="Toggle Fullscreen" id="toggleTimerFullscreen" class="btn btn-icon timer-button-fullscreen" onClick="toggleFullscreen()"></button>
           </div>
@@ -83,7 +89,7 @@
 </html>
 
 <script>
-  let timer, user, ownedTimers, initialFullscreen; // ownedTimers list timers owned be logged out user
+  let timer, user, initialFullscreen;
   user = '<%- JSON.stringify(user) %>';
   if (user) {
     user = JSON.parse(user);
@@ -92,11 +98,6 @@
   timer = `<%- JSON.stringify(timer) %>`;
   timer = JSON.parse(timer);
   console.log({timer: timer})
-
-  ownedTimers = '<%- JSON.stringify(ownedTimers) %>';
-  if (ownedTimers) {
-    ownedTimers = JSON.parse(ownedTimers);
-  }
 
   initialFullscreen = `<%- JSON.stringify(fullscreen) %>`;
   initialFullscreen = JSON.parse(initialFullscreen);
@@ -123,9 +124,9 @@
   timerContainerEl.addEventListener("fullscreenchange", enableNoSleep);
 
   // Add 1000 to make up for starting timer at 4:00 and holding it for 1 sec
-  if (timer.timer_buffer || timer.single_countdown) {
-    timer.timer_buffer += 1;
-  }
+  // This is now done on backend when timerDisplayValues are computed
+  //timer.timer_buffer += 1;
+    
   var roundTime = timer.timer_duration * 1000 + timer.timer_buffer * 1000; 
   var roundTimeSec = Math.floor(roundTime / 1000);
   var timerInterval;
@@ -152,8 +153,6 @@
     bufferSec: 0
   }
 
-  setTimerOwnerButtons();
-
   initializeTimer();
   updateTimerEl();
   if (!timer.is_paused) { 
@@ -167,24 +166,6 @@
     timerContainerEl.classList.remove('timer-container');
     timerContainerEl.classList.add('timer-container-fullscreen');
     bodyEl.appendChild(timerContainerEl);
-  }
-
-  function setTimerOwnerButtons() {
-    // If userID does not match timer userID and timer does not belong to clients temp timers
-    // then control buttons are removed
-    if (user.id !== timer.user_id && !ownedTimers.includes(timer.timer_code)) {
-      let syncTimerButtonEl = document.getElementById("syncTimersButton");
-      syncTimerButtonEl.remove();
-      let resetTimerButtonEl = document.getElementById("resetTimerButton");
-      toggleTimerButton.remove();
-      resetTimerButtonEl.remove();
-      forwardTimerButton.remove();
-      rewindTimerButton.remove();
-    }
-    if (user.id !== timer.user_id && user.id !== 2) { // User 2 is admin
-      let deleteTimerButtonEl = document.getElementById("deleteTimerButton");
-      deleteTimerButtonEl.remove();
-    }
   }
 
   function playSound() {
@@ -471,7 +452,7 @@ function forwardTimer() {
     timerInterval = setInterval(timerStep, 20);
 
     // Uppfæra play/pause takka
-    if (user.id === timer.user_id || ownedTimers.includes(timer.timer_code)) {
+    if (toggleTimerButton) {
       toggleTimerButton.classList.add('timer-button-pause');
       toggleTimerButton.classList.remove('timer-button-play');
     }
@@ -561,7 +542,7 @@ function forwardTimer() {
     timer.is_paused = true;
 
     // Uppfæra play/pause takka
-    if (user.id === timer.user_id || ownedTimers.includes(timer.timer_code)) {
+    if (toggleTimerButton) {
       toggleTimerButton.classList.add('timer-button-play');
       toggleTimerButton.classList.remove('timer-button-pause');
     }

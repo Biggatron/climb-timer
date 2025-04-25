@@ -23,7 +23,8 @@ passport.deserializeUser(async (id, done) => {
     var user = {
       id : result.rows[0].id,
       name : result.rows[0].name,
-      email : result.rows[0].email
+      email : result.rows[0].email,
+      is_admin : result.rows[0].is_admin
     };
     console.log(user);
     done(null, user);
@@ -61,14 +62,16 @@ passport.use(new GoogleStrategy({
         var user = {
           id : result.rows[0].id,
           name : result.rows[0].name,
-          email : result.rows[0].email
+          email : result.rows[0].email,
+          is_admin : result.rows[0].is_admin
         };
       };
     } else {
       var user = {
         id : result.rows[0].id,
         name : result.rows[0].name,
-        email : result.rows[0].email
+        email : result.rows[0].email,
+        is_admin : result.rows[0].is_admin
       };
     }
     return done(null, user);
@@ -97,6 +100,7 @@ passport.use(new LocalStrategy({
       googleId : result.rows[0].google_id,
       name : result.rows[0].name,
       email : result.rows[0].email,
+      is_admin : result.rows[0].is_admin
     };
 
     // If googleId is present then there's no password to validate and user must login using google

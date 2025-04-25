@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const query = require('../db/db');
 const {prepareTimerForOutput} = require('../utilities/util');
+const {pickTextColorBasedOnBgColor} = require('../utilities/util');
 
 const authCheck = (req, res, next) => {
     if(!req.user){
@@ -11,11 +12,11 @@ const authCheck = (req, res, next) => {
 };
 
 router.get('/', (req, res) => {
-    getTimers(res, req);
+    getTimers(req, res);
 });
 
 router.get('/search', (req, res) => {
-    searchTimers(res, req);
+    searchTimers(req, res);
 });
 
 router.get('/create', (req, res) => {
@@ -29,18 +30,17 @@ router.post('/create', (req, res) => {
 router.get('/:id/fullscreen', (req, res) => {
     let { id } = req.params;
     let fullscreen = true;
-    getTimer(res, req, id, fullscreen);
+    getTimer(req, res, id, fullscreen);
 });
 
 router.get('/*', (req, res) => {
     let id = req.params[0];
     let fullscreen = false;
-    getTimer(res, req, id, fullscreen);
+    getTimer(req, res, id, fullscreen);
 });
 
 router.delete('/*', (req, res) => {
-    console.log('delete route hit')
-    deleteTimer(res, req);
+    deleteTimer(req, res);
 });
 
 async function createTimer(req, res) {
@@ -70,8 +70,11 @@ async function createTimer(req, res) {
     }
 }
 
-async function getTimer(res, req, timerCode, fullscreen) {
+async function getTimer(req, res, timerCode, fullscreen) {
     let user = req.user;
+    if (typeof user === 'undefined') {
+        user = {};
+    }
     console.log("Query timer: " + timerCode);
     const result = await query(
         `SELECT * FROM timer WHERE timer_code = '${timerCode}'`
@@ -81,9 +84,7 @@ async function getTimer(res, req, timerCode, fullscreen) {
         res.sendStatus(404);
         return;
     } 
-    
-    console.log("Query successfull: ");
-    console.log({timer: timer});
+
     timer.time_elapsed = parseInt(timer.time_elapsed); // Bigint returns string
     if (timer.time_elapsed) {
     }
@@ -91,9 +92,29 @@ async function getTimer(res, req, timerCode, fullscreen) {
         let timeElapsedFromStart = new Date() - timer.start_time;
         timer.time_elapsed += timeElapsedFromStart;
     }
-    res.render('timer/timer', { timer: timer, user: user, ownedTimers: req.session.timers, fullscreen: fullscreen });
+
+    // Compute timer display values to prevent jitter on page load
+    timer = computeTimerDisplayValues(timer);
+
+    // Determine if user is owner of timer to render owner specific features
+    user.isOwner = checkIfUserIsOwner(user, timer, req.session.timers); 
+    res.render('timer/timer', { timer: timer, user: user, fullscreen: fullscreen });
     incrementTimerCounter(timerCode);
     return;
+}
+
+function checkIfUserIsOwner(user, timer, ownedTimers) {
+    if (user.hasOwnProperty('id')) {
+        if (user.id === timer.user_id) {
+            return true;
+        }
+    }
+    if (ownedTimers) {
+        if (ownedTimers.includes(timer.timer_code)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 function incrementTimerCounter(timerCode) {
@@ -103,7 +124,7 @@ function incrementTimerCounter(timerCode) {
     );
 }
 
-async function searchTimers(res, req) { 
+async function searchTimers(req, res) { 
     let searchString = req.query.filters.timerName;
     let user = req.user;
     console.log("Search query timer: " + searchString);
@@ -116,7 +137,7 @@ async function searchTimers(res, req) {
     return;
 }
 
-async function getTimers(res, req) {
+async function getTimers(req, res) {
     const timerResult = await query(
         `SELECT * FROM timer WHERE is_public = true ORDER BY last_visit_time DESC LIMIT 20`
     )
@@ -133,7 +154,7 @@ async function getTimers(res, req) {
     return;
 }
 
-async function deleteTimer(res, req) {
+async function deleteTimer(req, res) {
     let timerCode = req.params[0];
     let user = req.user;
     
@@ -195,5 +216,73 @@ async function getNewTimerCode() {
     };
     return 0;
 }
+
+function computeTimerDisplayValues (timer) {
+    // Add 1000 to make up for starting timer at 4:00 and holding it for 1 sec
+    timer.timer_buffer += 1;
+    
+    let roundTime = timer.timer_duration * 1000 + timer.timer_buffer * 1000;
+
+    timer.timerMinOrig = Math.floor(timer.timer_duration / 60);
+    timer.timerSecOrig = timer.timer_duration % 60;
+    timer.bufferMinOrig = Math.floor(timer.timer_buffer / 60);
+    timer.bufferSecOrig = timer.timer_buffer % 60;
+    timer.round = 1;
+  
+    if (timer.time_elapsed) {
+      let timerRemaining, bufferRemaining;
+      let timerElapsedMod = timer.time_elapsed % roundTime;
+  
+      // Get the round number from elapsed time
+      if (timer.time_elapsed > roundTime) {
+        timer.round += Math.floor(timer.time_elapsed / roundTime);
+      }
+      // Set timer and buffer from elapsed time
+      if ( timerElapsedMod < timer.timer_duration * 1000) {
+        timerRemaining = timer.timer_duration * 1000 - timerElapsedMod;
+        bufferRemaining = timer.timer_buffer * 1000;
+        timer.bufferActive = false;
+      } else if ( timerElapsedMod < roundTime ) {
+        timerRemaining = 0;
+        bufferRemaining = timer.timer_buffer * 1000 - (timerElapsedMod - timer.timer_duration * 1000);
+        timer.bufferActive = true;
+      };
+  
+      timerRemaining = Math.floor( timerRemaining / 1000);
+      bufferRemaining = Math.floor( bufferRemaining / 1000);
+      timer.timerMin = Math.floor(timerRemaining / 60);
+      timer.timerSec = ( timerRemaining + 1 ) % 60; // Timer on refresh was one second ahead of time
+      timer.bufferMin = Math.floor(bufferRemaining / 60);
+      timer.bufferSec = bufferRemaining % 60;
+      timer.timerMil = 1000 - (timer.time_elapsed % 1000);
+    } else {
+      timer.timerMin = timer.timerMinOrig;
+      timer.timerSec = timer.timerSecOrig;
+      timer.bufferMin = timer.bufferMinOrig;
+      timer.bufferSec = timer.bufferSecOrig;
+      timer.timerMil = 0; 
+      timer.bufferActive = false;
+    }
+
+    // Determine background color
+    if (timer.bufferActive) {
+        timer.backgroundColor = timer.buffer_color || "#FFFB80";
+    } else {
+      if (timer.rotating_background_color) {
+        if ( timer.round % 2 === 0 ) {
+            timer.backgroundColor = timer.secondary_color ||"#93B5FF";
+        } else {
+            timer.backgroundColor = timer.main_color || "#93FF9F";
+        }
+      } else {
+        timer.backgroundColor = timer.main_color || "#93FF9F";
+      }
+    }
+
+    // Determine text color
+    timer.textColor = pickTextColorBasedOnBgColor(timer.backgroundColor, "#000000", "#ffffff");
+
+    return timer;
+  }
 
 module.exports = router;

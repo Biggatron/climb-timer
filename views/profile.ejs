@@ -14,7 +14,10 @@
   <div class="content-container">
     <div class="space-between-row vertical-align-content">
       <h1>Welcome to your profile, <%= user.name.split(' ').shift() %></h1>
-      <div><a href="/auth/logout"><button class="btn">Logout</button></a></div>
+      <div class="center-row-container">
+        <div><button class="btn" onClick="deleteUser()">Delete user</button></div>
+        <div><a href="/auth/logout"><button class="btn">Logout</button></a></div>
+      </div>
     </div>
     <!-- <div>
       <div class="space-between-row">
@@ -65,6 +68,7 @@
 </html>
 
 <script>
+  let loaderEl = document.getElementById("loader");
   addRowHandlers();
 
   function addRowHandlers() {
@@ -83,4 +87,28 @@
     currentRow.onclick = createClickHandler(currentRow);
   }
 }
+
+async function deleteUser() {
+    if (confirm("Are you sure you wish to delete your user?") === false) {
+      showToast("Action canceled")
+      return;
+    }
+    // Delete user
+    showLoader();
+    let deleteResponse = await deleteData('/profile');  
+    hideLoader();
+    if (deleteResponse.status === 200) {
+      window.location.href = '/';
+    } else {
+      alert('Failed to delete user');
+    }
+  }
+
+  function showLoader() {
+    loaderEl.classList.remove('display-none');
+  }
+
+  function hideLoader() {
+    loaderEl.classList.add('display-none');
+  }
 </script>

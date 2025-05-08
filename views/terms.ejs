@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('./partials/head'); %>
+    <title>Terms of Service - Climb Timer</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        line-height: 1.6;
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+        color: #222;
+      }
+
+      h1,
+      h2 {
+        color: #111;
+      }
+
+      h1 {
+        font-size: 2em;
+        margin-bottom: 0.5em;
+      }
+
+      h2 {
+        margin-top: 2em;
+        font-size: 1.4em;
+      }
+
+      p {
+        margin: 1em 0;
+      }
+
+      ul {
+        margin: 0.5em 0 1.5em 1.5em;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header><%- include('./partials/header', {navItem: 'login' }); %></header>
+    <main>
+      <div class="content-container">
+        <h1>Terms of Service</h1>
+        <p><em>Last updated: April 26th 2025</em></p>
+
+        <p>
+          Welcome to <strong>Climb Timer</strong>! Please read these Terms of
+          Service carefully before using our site.
+        </p>
+
+        <h2>1. Acceptance of Terms</h2>
+        <p>
+          By accessing or using Climb Timer, you agree to be bound by these
+          Terms. If you do not agree, please do not use the service.
+        </p>
+
+        <h2>2. Use of the Service</h2>
+
+        <ul>
+          <li>You can create and manage timers without creating an account.</li>
+          <li>
+            If you create an account, you are responsible for maintaining the
+            security of your account and any activities under your account.
+          </li>
+          <li>
+            You agree not to use Climb Timer for any illegal or unauthorized
+            purpose.
+          </li>
+        </ul>
+
+        <h2>3. Accounts</h2>
+        <p>
+          If you register for an account, you must provide accurate and complete
+          information. You are responsible for keeping your login information
+          secure.
+        </p>
+
+        <h2>4. Modifications to the Service</h2>
+        <p>
+          We may update or modify Climb Timer at any time to improve your
+          experience. We’ll try to provide notice for significant changes, but
+          minor updates may happen without notice.
+        </p>
+
+        <h2>5. Termination</h2>
+        <p>
+          We may suspend or terminate your access to Climb Timer if you violate
+          these Terms. You can also delete your account at any time through your
+          account settings.
+        </p>
+
+        <h2>6. Disclaimer</h2>
+        <p>
+          Climb Timer is provided "as is" without warranties of any kind. We do
+          our best to keep the service running smoothly, but we cannot guarantee
+          it will always be error-free or uninterrupted.
+        </p>
+
+        <h2>7. Limitation of Liability</h2>
+        <p>
+          We are not liable for any indirect, incidental, or consequential
+          damages arising out of your use of Climb Timer.
+        </p>
+
+        <h2>8. Contact Us</h2>
+        <p>
+          If you have any questions about these Terms, feel free to reach out:
+        </p>
+        <p>
+          <strong>Email</strong>:
+          <a href="mailto:climbtimer.webapp@gmail.com"
+            >climbtimer.webapp@gmail.com</a
+          >
+        </p>
+      </div>
+    </main>
+    <footer><%- include('./partials/footer'); %></footer>
+  </body>
+</html>

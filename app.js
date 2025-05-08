@@ -61,6 +61,14 @@ app.use(function(err, req, res, next) {
   }
 });
 
+app.get('/privacy', (req, res) => {
+  res.render('privacy', { user: req.user });
+});
+
+app.get('/terms', (req, res) => {
+  res.render('terms', { user: req.user });
+});
+
 // set up routes
 app.use('/auth', authRoutes);
 app.use('/profile', profileRoutes);

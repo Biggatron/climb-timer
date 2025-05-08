@@ -59,6 +59,7 @@ async function deleteData(url = '') {
   } else {
     try {
       let json = await response.json();
+      json.status = response.status;
       return json;
     } catch (error) {
       return response;
